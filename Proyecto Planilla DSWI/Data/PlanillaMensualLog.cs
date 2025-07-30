@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using Proyecto_Planilla_DSWI.Models;
 using Proyecto_Planilla_DSWI.Utils.Request;
 using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
@@ -94,10 +95,10 @@ namespace Proyecto_Planilla_DSWI.Data
 
             // Eliminar registros existentes del período
             string deleteSql = "DELETE FROM PlanillaMensual WHERE Año = @Año AND Mes = @Mes";
-            var deleteParameters = new SqlParameter[]
+            var deleteParameters = new MySqlParameter[]
             {
-                new SqlParameter("@Año", arr[0].Año),
-                new SqlParameter("@Mes", arr[0].Mes)
+                new MySqlParameter("@Año", arr[0].Año),
+                new MySqlParameter("@Mes", arr[0].Mes)
             };
 
             ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
@@ -131,57 +132,57 @@ namespace Proyecto_Planilla_DSWI.Data
                         {
                             using (var command = new SqlCommand(insertSql, connection, transaction))
                             {
-                                command.Parameters.AddRange(new SqlParameter[]
+                                command.Parameters.AddRange(new MySqlParameter[]
                                 {
-                                    new SqlParameter("@Año", item.Año),
-                                    new SqlParameter("@Mes", item.Mes),
-                                    new SqlParameter("@IdTrabajador", item.IdTrabajador),
-                                    new SqlParameter("@IdSituacion", item.IdSituacion),
-                                    new SqlParameter("@IdCargo", item.IdCargo),
-                                    new SqlParameter("@Apellido", item.Apellido),
-                                    new SqlParameter("@Nombre", item.Nombre),
-                                    new SqlParameter("@IdSistemaPension", item.IdSistemaPension),
-                                    new SqlParameter("@IdEstadoCivil", item.IdEstadoCivil),
-                                    new SqlParameter("@Hijos", item.Hijos),
-                                    new SqlParameter("@FechaIngreso", item.FechaIngreso),
-                                    new SqlParameter("@SueldoBasico", item.SueldoBasico),
-                                    new SqlParameter("@PorcHoraExtra1", item.PorcHoraExtra1),
-                                    new SqlParameter("@PorcHoraExtra2", item.PorcHoraExtra2),
-                                    new SqlParameter("@PorcDescansoTrab", item.PorcDescansoTrab),
-                                    new SqlParameter("@PorcFeriadoTrab", item.PorcFeriadoTrab),
-                                    new SqlParameter("@PorcAsigFamiliar", item.PorcAsigFamiliar),
-                                    new SqlParameter("@nHorasNormal", item.nHorasNormal),
-                                    new SqlParameter("@nHorasExtra1", item.nHorasExtra1),
-                                    new SqlParameter("@nHorasExtra2", item.nHorasExtra2),
-                                    new SqlParameter("@nDiasTrab", item.nDiasTrab),
-                                    new SqlParameter("@nDiasDescansos", item.nDiasDescansos),
-                                    new SqlParameter("@nFeriadosTrab", item.nFeriadosTrab),
-                                    new SqlParameter("@nDescansosTrab", item.nDescansosTrab),
-                                    new SqlParameter("@nDiasInasistencias", item.nDiasInasistencias),
-                                    new SqlParameter("@HaberBasico", item.HaberBasico),
-                                    new SqlParameter("@ValesEmpleado", item.ValesEmpleado),
-                                    new SqlParameter("@vHorasExtra1", item.vHorasExtra1),
-                                    new SqlParameter("@vHorasExtra2", item.vHorasExtra2),
-                                    new SqlParameter("@vAsigFamiliar", item.vAsigFamiliar),
-                                    new SqlParameter("@vDescansoTrab", item.vDescansoTrab),
-                                    new SqlParameter("@vFeriadoTrab", item.vFeriadoTrab),
-                                    new SqlParameter("@BonificacionCargo", item.BonificacionCargo),
-                                    new SqlParameter("@BonificacionMovilidad", item.BonificacionMovilidad),
-                                    new SqlParameter("@CanastaNavidad", item.CanastaNavidad),
-                                    new SqlParameter("@Escolaridad", item.Escolaridad),
-                                    new SqlParameter("@DiaTrabajador", item.DiaTrabajador),
-                                    new SqlParameter("@TotalIngreso", item.TotalIngreso),
-                                    new SqlParameter("@PorcAporte", item.PorcAporte),
-                                    new SqlParameter("@Aporte", item.Aporte),
-                                    new SqlParameter("@PorcComision", item.PorcComision),
-                                    new SqlParameter("@Comision", item.Comision),
-                                    new SqlParameter("@PorcPrima", item.PorcPrima),
-                                    new SqlParameter("@Prima", item.Prima),
-                                    new SqlParameter("@TotalDescuento", item.TotalDescuento),
-                                    new SqlParameter("@TotalNetoBoleta", item.TotalNetoBoleta),
-                                    new SqlParameter("@TotalNetoBoletaCad", item.TotalNetoBoletaCad),
-                                    new SqlParameter("@FecCreacion", item.FecCreacion),
-                                    new SqlParameter("@Activo", item.Activo)
+                                    new MySqlParameter("@Año", item.Año),
+                                    new MySqlParameter("@Mes", item.Mes),
+                                    new MySqlParameter("@IdTrabajador", item.IdTrabajador),
+                                    new MySqlParameter("@IdSituacion", item.IdSituacion),
+                                    new MySqlParameter("@IdCargo", item.IdCargo),
+                                    new MySqlParameter("@Apellido", item.Apellido),
+                                    new MySqlParameter("@Nombre", item.Nombre),
+                                    new MySqlParameter("@IdSistemaPension", item.IdSistemaPension),
+                                    new MySqlParameter("@IdEstadoCivil", item.IdEstadoCivil),
+                                    new MySqlParameter("@Hijos", item.Hijos),
+                                    new MySqlParameter("@FechaIngreso", item.FechaIngreso),
+                                    new MySqlParameter("@SueldoBasico", item.SueldoBasico),
+                                    new MySqlParameter("@PorcHoraExtra1", item.PorcHoraExtra1),
+                                    new MySqlParameter("@PorcHoraExtra2", item.PorcHoraExtra2),
+                                    new MySqlParameter("@PorcDescansoTrab", item.PorcDescansoTrab),
+                                    new MySqlParameter("@PorcFeriadoTrab", item.PorcFeriadoTrab),
+                                    new MySqlParameter("@PorcAsigFamiliar", item.PorcAsigFamiliar),
+                                    new MySqlParameter("@nHorasNormal", item.nHorasNormal),
+                                    new MySqlParameter("@nHorasExtra1", item.nHorasExtra1),
+                                    new MySqlParameter("@nHorasExtra2", item.nHorasExtra2),
+                                    new MySqlParameter("@nDiasTrab", item.nDiasTrab),
+                                    new MySqlParameter("@nDiasDescansos", item.nDiasDescansos),
+                                    new MySqlParameter("@nFeriadosTrab", item.nFeriadosTrab),
+                                    new MySqlParameter("@nDescansosTrab", item.nDescansosTrab),
+                                    new MySqlParameter("@nDiasInasistencias", item.nDiasInasistencias),
+                                    new MySqlParameter("@HaberBasico", item.HaberBasico),
+                                    new MySqlParameter("@ValesEmpleado", item.ValesEmpleado),
+                                    new MySqlParameter("@vHorasExtra1", item.vHorasExtra1),
+                                    new MySqlParameter("@vHorasExtra2", item.vHorasExtra2),
+                                    new MySqlParameter("@vAsigFamiliar", item.vAsigFamiliar),
+                                    new MySqlParameter("@vDescansoTrab", item.vDescansoTrab),
+                                    new MySqlParameter("@vFeriadoTrab", item.vFeriadoTrab),
+                                    new MySqlParameter("@BonificacionCargo", item.BonificacionCargo),
+                                    new MySqlParameter("@BonificacionMovilidad", item.BonificacionMovilidad),
+                                    new MySqlParameter("@CanastaNavidad", item.CanastaNavidad),
+                                    new MySqlParameter("@Escolaridad", item.Escolaridad),
+                                    new MySqlParameter("@DiaTrabajador", item.DiaTrabajador),
+                                    new MySqlParameter("@TotalIngreso", item.TotalIngreso),
+                                    new MySqlParameter("@PorcAporte", item.PorcAporte),
+                                    new MySqlParameter("@Aporte", item.Aporte),
+                                    new MySqlParameter("@PorcComision", item.PorcComision),
+                                    new MySqlParameter("@Comision", item.Comision),
+                                    new MySqlParameter("@PorcPrima", item.PorcPrima),
+                                    new MySqlParameter("@Prima", item.Prima),
+                                    new MySqlParameter("@TotalDescuento", item.TotalDescuento),
+                                    new MySqlParameter("@TotalNetoBoleta", item.TotalNetoBoleta),
+                                    new MySqlParameter("@TotalNetoBoletaCad", item.TotalNetoBoletaCad),
+                                    new MySqlParameter("@FecCreacion", item.FecCreacion),
+                                    new MySqlParameter("@Activo", item.Activo)
                                 });
                                 command.ExecuteNonQuery();
                             }
@@ -203,10 +204,10 @@ namespace Proyecto_Planilla_DSWI.Data
         {
             string cadena = $@"SELECT * FROM PlanillaMensual WHERE Año = @Año AND Mes = @Mes";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Año", año),
-                new SqlParameter("@Mes", mes)
+                new MySqlParameter("@Año", año),
+                new MySqlParameter("@Mes", mes)
             };
 
             var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters);
@@ -219,11 +220,11 @@ namespace Proyecto_Planilla_DSWI.Data
                               WHERE Año = @Año AND Mes = @Mes AND IdTrabajador IN 
                               (SELECT IdTrabajador FROM Trabajadores WHERE Documento = @Documento)";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Año", objboleta.Año),
-                new SqlParameter("@Mes", objboleta.Mes),
-                new SqlParameter("@Documento", objboleta.Documento)
+                new MySqlParameter("@Año", objboleta.Año),
+                new MySqlParameter("@Mes", objboleta.Mes),
+                new MySqlParameter("@Documento", objboleta.Documento)
             };
 
             var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters);

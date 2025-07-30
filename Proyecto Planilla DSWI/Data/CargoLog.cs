@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using Proyecto_Planilla_DSWI.Models;
 using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
 
@@ -11,15 +12,15 @@ namespace Proyecto_Planilla_DSWI.Data
             string cadena = $@"INSERT INTO Cargos
                               (Nombre, FecCreacion, Activo)
                               VALUES (@Nombre, @FecCreacion, @Activo);
-                              SELECT SCOPE_IDENTITY();";
+                              SELECT LAST_INSERT_ID();";  // Cambiado SCOPE_IDENTITY() por LAST_INSERT_ID()
 
             new AuditoriaLog().SetAuditFieldsForInsert(obj);
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Nombre", obj.Nombre),
-                new SqlParameter("@FecCreacion", obj.FecCreacion),
-                new SqlParameter("@Activo", obj.Activo)
+                new MySqlParameter("@Nombre", obj.Nombre),
+                new MySqlParameter("@FecCreacion", obj.FecCreacion),
+                new MySqlParameter("@Activo", obj.Activo)
             };
 
             return ADOConnection.ExecuteInt(cadena, parameters);
@@ -34,11 +35,11 @@ namespace Proyecto_Planilla_DSWI.Data
 
             new AuditoriaLog().SetAuditFieldsForUpdate(obj);
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdCargo", obj.IdCargo),
-                new SqlParameter("@Nombre", obj.Nombre),
-                new SqlParameter("@FecUltimaModificacion", obj.FecUltimaModificacion)
+                new MySqlParameter("@IdCargo", obj.IdCargo),
+                new MySqlParameter("@Nombre", obj.Nombre),
+                new MySqlParameter("@FecUltimaModificacion", obj.FecUltimaModificacion)
             };
 
             return ADOConnection.ExecuteNonQuery(cadena, parameters) ? 1 : 0;
@@ -55,10 +56,10 @@ namespace Proyecto_Planilla_DSWI.Data
                               WHERE IdCargo = @IdCargo;
                               SELECT 1;";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdCargo", id),
-                new SqlParameter("@FecUltimaModificacion", DateTime.Now)
+                new MySqlParameter("@IdCargo", id),
+                new MySqlParameter("@FecUltimaModificacion", DateTime.Now)
             };
 
             return ADOConnection.ExecuteInt(cadena, parameters);

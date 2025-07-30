@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 
 namespace Proyecto_Planilla_DSWI.Data
@@ -18,21 +19,21 @@ namespace Proyecto_Planilla_DSWI.Data
                         .SetBasePath(Directory.GetCurrentDirectory())
                         .AddJsonFile("appsettings.json")
                         .Build();
-                    
+
                     _connectionString = configuration.GetConnectionString("DefaultConnection");
                 }
                 return _connectionString;
             }
         }
 
-        public static int ExecuteInt(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static int ExecuteInt(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
@@ -45,14 +46,14 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static string ExecuteString(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static string ExecuteString(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
@@ -65,14 +66,14 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static bool ExecuteBool(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static bool ExecuteBool(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
@@ -85,14 +86,14 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static DateTime ExecuteDateTime(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static DateTime ExecuteDateTime(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
@@ -105,20 +106,20 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static DataTable ExecuteDataTable(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static DataTable ExecuteDataTable(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
                     }
 
-                    using (var adapter = new SqlDataAdapter(command))
+                    using (var adapter = new MySqlDataAdapter(command))
                     {
                         var dataTable = new DataTable();
                         adapter.Fill(dataTable);
@@ -128,12 +129,12 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static SqlDataReader ExecuteReader(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static MySqlDataReader ExecuteReader(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            var connection = new SqlConnection(ConnectionString);
-            var command = new SqlCommand(sql, connection);
+            var connection = new MySqlConnection(ConnectionString);
+            var command = new MySqlCommand(sql, connection);
             command.CommandType = commandType;
-            
+
             if (parameters != null)
             {
                 command.Parameters.AddRange(parameters);
@@ -143,14 +144,14 @@ namespace Proyecto_Planilla_DSWI.Data
             return command.ExecuteReader(CommandBehavior.CloseConnection);
         }
 
-        public static bool ExecuteNonQuery(string sql, SqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
+        public static bool ExecuteNonQuery(string sql, MySqlParameter[] parameters = null, CommandType commandType = CommandType.Text)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
-                using (var command = new SqlCommand(sql, connection))
+                using (var command = new MySqlCommand(sql, connection))
                 {
                     command.CommandType = commandType;
-                    
+
                     if (parameters != null)
                     {
                         command.Parameters.AddRange(parameters);
@@ -162,9 +163,9 @@ namespace Proyecto_Planilla_DSWI.Data
             }
         }
 
-        public static bool ExecuteTransaction(string[] sqlCommands, SqlParameter[][] parameters = null)
+        public static bool ExecuteTransaction(string[] sqlCommands, MySqlParameter[][] parameters = null)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var connection = new MySqlConnection(ConnectionString))
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
@@ -173,7 +174,7 @@ namespace Proyecto_Planilla_DSWI.Data
                     {
                         for (int i = 0; i < sqlCommands.Length; i++)
                         {
-                            using (var command = new SqlCommand(sqlCommands[i], connection, transaction))
+                            using (var command = new MySqlCommand(sqlCommands[i], connection, transaction))
                             {
                                 if (parameters != null && parameters.Length > i && parameters[i] != null)
                                 {
@@ -182,7 +183,7 @@ namespace Proyecto_Planilla_DSWI.Data
                                 command.ExecuteNonQuery();
                             }
                         }
-                        
+
                         transaction.Commit();
                         return true;
                     }
@@ -223,13 +224,16 @@ namespace Proyecto_Planilla_DSWI.Data
         public static List<T> MapDataTableToList<T>(DataTable dataTable) where T : new()
         {
             var list = new List<T>();
-            
+
             foreach (DataRow row in dataTable.Rows)
             {
                 list.Add(MapDataRowToObject<T>(row));
             }
-            
+
             return list;
         }
-    }
+
+
+
+       }
 } 

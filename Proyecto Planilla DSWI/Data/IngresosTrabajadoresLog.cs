@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using Proyecto_Planilla_DSWI.Models;
 using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
 
@@ -11,18 +12,18 @@ namespace Proyecto_Planilla_DSWI.Data
             string cadena = $@"INSERT INTO IngresosTrabajadores
                               (IdTrabajador, Remuneracion, Vale, BonifCargo, FecCreacion, Activo)
                               VALUES (@IdTrabajador, @Remuneracion, @Vale, @BonifCargo, @FecCreacion, @Activo);
-                              SELECT SCOPE_IDENTITY();";
+                              SELECT LAST_INSERT_ID();";  // Cambiado SCOPE_IDENTITY() por LAST_INSERT_ID()
 
             new AuditoriaLog().SetAuditFieldsForInsert(obj);
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdTrabajador", obj.IdTrabajador),
-                new SqlParameter("@Remuneracion", obj.Remuneracion),
-                new SqlParameter("@Vale", obj.Vale),
-                new SqlParameter("@BonifCargo", obj.BonifCargo),
-                new SqlParameter("@FecCreacion", obj.FecCreacion),
-                new SqlParameter("@Activo", obj.Activo)
+                new MySqlParameter("@IdTrabajador", obj.IdTrabajador),
+                new MySqlParameter("@Remuneracion", obj.Remuneracion),
+                new MySqlParameter("@Vale", obj.Vale),
+                new MySqlParameter("@BonifCargo", obj.BonifCargo),
+                new MySqlParameter("@FecCreacion", obj.FecCreacion),
+                new MySqlParameter("@Activo", obj.Activo)
             };
 
             return ADOConnection.ExecuteInt(cadena, parameters);
@@ -39,13 +40,13 @@ namespace Proyecto_Planilla_DSWI.Data
 
             new AuditoriaLog().SetAuditFieldsForUpdate(obj);
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdTrabajador", obj.IdTrabajador),
-                new SqlParameter("@Remuneracion", obj.Remuneracion),
-                new SqlParameter("@Vale", obj.Vale),
-                new SqlParameter("@BonifCargo", obj.BonifCargo),
-                new SqlParameter("@FecUltimaModificacion", obj.FecUltimaModificacion)
+                new MySqlParameter("@IdTrabajador", obj.IdTrabajador),
+                new MySqlParameter("@Remuneracion", obj.Remuneracion),
+                new MySqlParameter("@Vale", obj.Vale),
+                new MySqlParameter("@BonifCargo", obj.BonifCargo),
+                new MySqlParameter("@FecUltimaModificacion", obj.FecUltimaModificacion)
             };
 
             return ADOConnection.ExecuteNonQuery(cadena, parameters) ? 1 : 0;
@@ -62,10 +63,10 @@ namespace Proyecto_Planilla_DSWI.Data
                               WHERE IdTrabajador = @IdTrabajador;
                               SELECT 1;";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdTrabajador", id),
-                new SqlParameter("@FecUltimaModificacion", DateTime.Now)
+                new MySqlParameter("@IdTrabajador", id),
+                new MySqlParameter("@FecUltimaModificacion", DateTime.Now)
             };
 
             return ADOConnection.ExecuteInt(cadena, parameters);
@@ -75,9 +76,9 @@ namespace Proyecto_Planilla_DSWI.Data
         {
             string cadena = $@"SELECT TOP 1 * FROM IngresosTrabajadores WHERE IdTrabajador = @IdTrabajador";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@IdTrabajador", id)
+                new MySqlParameter("@IdTrabajador", id)
             };
 
             var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters);

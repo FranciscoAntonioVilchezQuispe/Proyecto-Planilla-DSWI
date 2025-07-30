@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using Proyecto_Planilla_DSWI.Models;
 using Proyecto_Planilla_DSWI.Utils.Response;
 
@@ -16,10 +17,10 @@ namespace Proyecto_Planilla_DSWI.Data
                               LEFT JOIN (SELECT * FROM AsistenciasTrabajadores WHERE Año = @Año AND Mes = @Mes) a 
                                    ON a.IdTrabajador = t.IdTrabajador";
 
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Año", año),
-                new SqlParameter("@Mes", mes)
+                new MySqlParameter("@Año", año),
+                new MySqlParameter("@Mes", mes)
             };
 
             var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters);
@@ -39,10 +40,10 @@ namespace Proyecto_Planilla_DSWI.Data
 
             // Eliminar registros existentes del período
             string deleteSql = "DELETE FROM AsistenciasTrabajadores WHERE Año = @Año AND Mes = @Mes";
-            var deleteParameters = new SqlParameter[]
+            var deleteParameters = new MySqlParameter[]
             {
-                new SqlParameter("@Año", arr[0].Año),
-                new SqlParameter("@Mes", arr[0].Mes)
+                new MySqlParameter("@Año", arr[0].Año),
+                new MySqlParameter("@Mes", arr[0].Mes)
             };
 
             ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
@@ -57,7 +58,7 @@ namespace Proyecto_Planilla_DSWI.Data
                                   @DiasInasistencia, @DiasFeriados, @HorasExtra25, @HorasExtra35,
                                   @FecCreacion, @Activo)";
 
-            using (var connection = new SqlConnection(ADOConnection.ConnectionString))
+            using (var connection = new MySqlConnection(ADOConnection.ConnectionString))
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
@@ -66,21 +67,21 @@ namespace Proyecto_Planilla_DSWI.Data
                     {
                         foreach (var item in arr)
                         {
-                            using (var command = new SqlCommand(insertSql, connection, transaction))
+                            using (var command = new MySqlCommand(insertSql, connection, transaction))
                             {
-                                command.Parameters.AddRange(new SqlParameter[]
+                                command.Parameters.AddRange(new MySqlParameter[]
                                 {
-                                    new SqlParameter("@IdTrabajador", item.IdTrabajador),
-                                    new SqlParameter("@Año", item.Año),
-                                    new SqlParameter("@Mes", item.Mes),
-                                    new SqlParameter("@DiasLaborales", item.DiasLaborales),
-                                    new SqlParameter("@DiasDescanso", item.DiasDescanso),
-                                    new SqlParameter("@DiasInasistencia", item.DiasInasistencia),
-                                    new SqlParameter("@DiasFeriados", item.DiasFeriados),
-                                    new SqlParameter("@HorasExtra25", item.HorasExtra25),
-                                    new SqlParameter("@HorasExtra35", item.HorasExtra35),
-                                    new SqlParameter("@FecCreacion", item.FecCreacion),
-                                    new SqlParameter("@Activo", item.Activo)
+                                    new MySqlParameter("@IdTrabajador", item.IdTrabajador),
+                                    new MySqlParameter("@Año", item.Año),
+                                    new MySqlParameter("@Mes", item.Mes),
+                                    new MySqlParameter("@DiasLaborales", item.DiasLaborales),
+                                    new MySqlParameter("@DiasDescanso", item.DiasDescanso),
+                                    new MySqlParameter("@DiasInasistencia", item.DiasInasistencia),
+                                    new MySqlParameter("@DiasFeriados", item.DiasFeriados),
+                                    new MySqlParameter("@HorasExtra25", item.HorasExtra25),
+                                    new MySqlParameter("@HorasExtra35", item.HorasExtra35),
+                                    new MySqlParameter("@FecCreacion", item.FecCreacion),
+                                    new MySqlParameter("@Activo", item.Activo)
                                 });
                                 command.ExecuteNonQuery();
                             }
