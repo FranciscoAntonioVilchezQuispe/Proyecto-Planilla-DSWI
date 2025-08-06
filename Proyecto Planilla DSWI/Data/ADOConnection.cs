@@ -213,12 +213,50 @@ namespace Proyecto_Planilla_DSWI.Data
                 {
                     try
                     {
-                        var value = Convert.ChangeType(row[property.Name], property.PropertyType);
-                        property.SetValue(obj, value);
+                        var value = row[property.Name];
+                        var propertyType = property.PropertyType;
+
+                        // Si el valor ya es del tipo correcto, asignarlo directamente
+                        if (value.GetType() == propertyType || propertyType.IsAssignableFrom(value.GetType()))
+                        {
+                            property.SetValue(obj, value);
+                        }
+                        else
+                        {
+                            // Manejar tipos nullable
+                            var targetType = propertyType;
+                            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                            {
+                                targetType = Nullable.GetUnderlyingType(propertyType);
+                            }
+
+                            // Conversión especial para algunos tipos comunes
+                            object convertedValue = null;
+
+                            if (targetType == typeof(int))
+                                convertedValue = Convert.ToInt32(value);
+                            else if (targetType == typeof(decimal))
+                                convertedValue = Convert.ToDecimal(value);
+                            else if (targetType == typeof(double))
+                                convertedValue = Convert.ToDouble(value);
+                            else if (targetType == typeof(float))
+                                convertedValue = Convert.ToSingle(value);
+                            else if (targetType == typeof(bool))
+                                convertedValue = Convert.ToBoolean(value);
+                            else if (targetType == typeof(DateTime))
+                                convertedValue = Convert.ToDateTime(value);
+                            else if (targetType == typeof(string))
+                                convertedValue = value.ToString();
+                            else
+                                convertedValue = Convert.ChangeType(value, targetType);
+
+                            property.SetValue(obj, convertedValue);
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Ignorar propiedades que no se pueden convertir
+                        // Log opcional del error específico
+                        // Console.WriteLine($"Error converting property {property.Name}: {ex.Message}");
                     }
                 }
             }
