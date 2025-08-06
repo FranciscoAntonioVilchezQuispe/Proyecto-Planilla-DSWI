@@ -17,10 +17,15 @@ namespace Proyecto_Planilla_DSWI.Data
                     // Obtener la cadena de conexión desde la configuración
                     var configuration = new ConfigurationBuilder()
                         .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json")
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                         .Build();
 
-                    _connectionString = configuration.GetConnectionString("DefaultConnection");
+                    _connectionString = configuration.GetConnectionString("Conexion");
+
+                    if (string.IsNullOrEmpty(_connectionString))
+                    {
+                        throw new InvalidOperationException("No se encontró la cadena de conexión 'Conexion' en el archivo appsettings.json");
+                    }
                 }
                 return _connectionString;
             }

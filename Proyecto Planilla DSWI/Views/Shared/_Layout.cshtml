@@ -10,22 +10,64 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Proyecto_Planilla_DSWI</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand" href="#">Sistema Planillas</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <!-- Mantenedor -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="mantenedorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Mantenedor
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="mantenedorDropdown">
+                                <li><a class="dropdown-item" asp-controller="Cargos" asp-action="Index">Cargos</a></li>
+                                <li><a class="dropdown-item" asp-controller="Generos" asp-action="Index">Géneros</a></li>
+                                <li><a class="dropdown-item" asp-controller="EstadosCiviles" asp-action="Index">Estados Civiles</a></li>
+                                <li><a class="dropdown-item" asp-controller="SistemaPensiones" asp-action="Index">Sistema de Pensiones</a></li>
+                                <li><a class="dropdown-item" asp-controller="SituacionTrabajador" asp-action="Index">Situación de Trabajador</a></li>
+                                <li><a class="dropdown-item" asp-controller="TiposDocumentos" asp-action="Index">Tipos de Documentos</a></li>
+                                <li><a class="dropdown-item" asp-controller="Parametros" asp-action="Index">Parámetros</a></li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+                        <!-- Trabajadores -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="trabajadoresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Trabajadores
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="trabajadoresDropdown">
+                                <li><a class="dropdown-item" asp-controller="Trabajadores" asp-action="FichaDatos">Ficha Datos</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Planilla -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="planillaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Planilla
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="planillaDropdown">
+                                <li><a class="dropdown-item" asp-controller="Asistencia" asp-action="CargaAsistencia">Asistencia Trabajador</a></li>
+                                <li><a class="dropdown-item" asp-controller="Planilla" asp-action="PlanillaMensual">Planilla Mensual</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Reportes -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="reportesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Reportes
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="reportesDropdown">
+                                <li><a class="dropdown-item" asp-controller="Reportes" asp-action="Boleta">Reporte Boleta</a></li>
+                            </ul>
                         </li>
                     </ul>
+
+                    <!-- Aquí puedes agregar el partial de login si es necesario -->
+                   @*  <partial name="_LoginPartial" /> *@
                 </div>
             </div>
         </nav>
