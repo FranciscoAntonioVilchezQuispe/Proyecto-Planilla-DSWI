@@ -1,0 +1,84 @@
+﻿@model SistemaPensiones
+
+@{
+    ViewData["Title"] = Model.IdSistemaPension == 0 ? "Crear Sistema de Pensión" : "Editar Sistema de Pensión";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Manage">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @if (Model.IdSistemaPension > 0)
+            {
+                <input type="hidden" asp-for="IdSistemaPension" />
+
+                <div class="form-group">
+                    <label class="control-label">ID</label>
+                    <input value="@Model.IdSistemaPension" class="form-control" disabled />
+                </div>
+            }
+
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            @if (Model.IdSistemaPension > 0)
+            {
+                <div class="form-group">
+                    <label class="control-label">Fecha Creación</label>
+                    <input value="@Model.FecCreacion?.ToString("dd/MM/yyyy")" class="form-control" disabled />
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Última Modificación</label>
+                    <input value="@(Model.FecUltimaModificacion?.ToString("dd/MM/yyyy") ?? "N/A")" class="form-control" disabled />
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label">Estado</label>
+                    <input value="@(Convert.ToBoolean( Model.Activo)? "Activo" : "Inactivo")" class="form-control" disabled />
+                </div>
+            }
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="SistemaPension" class="btn btn-secondary">Volver</a>
+
+                @if (Model.IdSistemaPension > 0)
+                {
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.IdSistemaPension" />
+                        <button type="submit" class="btn @(Convert.ToBoolean(Model.Activo) ? "btn-warning" : "btn-success")">
+                            @(Convert.ToBoolean(Model.Activo) ? "Desactivar" : "Activar")
+                        </button>
+                    </form>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
