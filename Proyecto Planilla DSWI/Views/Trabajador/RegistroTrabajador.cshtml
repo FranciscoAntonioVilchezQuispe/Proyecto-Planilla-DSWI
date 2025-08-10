@@ -1,0 +1,204 @@
+﻿@model Proyecto_Planilla_DSWI.Models.Trabajadores
+@{
+    ViewData["Title"] = "RegistroTrabajador";
+}
+<h1>@ViewBag.h1</h1>
+
+<hr />
+
+<div class="row">
+    <form asp-action="RegistroTrabajador">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <input asp-for="IdTrabajador" type="hidden" />
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="container text-center">
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="IdTipoDocumento" class="control-label">Tipo Documento: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <select asp-for="IdTipoDocumento" asp-items="ViewBag.tipoDocumento"
+                                    class="form-select"></select>
+                            <span asp-validation-for="IdTipoDocumento" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="Documento" class="control-label">Nro. Documento: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="Documento" class="form-control" />
+                            <span asp-validation-for="Documento" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="Nombres" class="control-label">Nombres: </label>
+                        </div>
+                        <div class="col-8 text-start">
+                            <input asp-for="Nombres" class="form-control" />
+                            <span asp-validation-for="Nombres" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="ApellidoPaterno" class="control-label">Apellido Paterno: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="ApellidoPaterno" class="form-control" />
+                            <span asp-validation-for="ApellidoPaterno" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="ApellidoMaterno" class="control-label">Apellido Materno: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="ApellidoMaterno" class="form-control" />
+                            <span asp-validation-for="ApellidoMaterno" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="FecNacimiento" class="control-label">Fec. Nacimiento: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="FecNacimiento" class="form-control" />
+                            <span asp-validation-for="FecNacimiento" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="IdGenero" class="control-label">Genero: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            @Html.DropDownListFor(
+                            model => model.IdGenero,
+                                                        ViewBag.genero as SelectList,
+                                                        "-- Seleccione --",
+                                                        new { @class = "form-select" }
+                                                        )
+                            <span asp-validation-for="IdGenero" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="IdEstadoCivil" class="control-label">Est. Civil: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            @Html.DropDownListFor(
+                                                        model => model.IdEstadoCivil,
+                                                        ViewBag.estCivil as SelectList,
+                                                        "-- Seleccione --",
+                                                        new { @class = "form-select" }
+                                                        )
+                            <span asp-validation-for="IdEstadoCivil" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="Hijos" class="control-label">Nro. Hijos: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="Hijos" class="form-control" />
+                            <span asp-validation-for="Hijos" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="Direccion" class="control-label">Dirección: </label>
+                        </div>
+                        <div class="col-8 text-start">
+                            <input asp-for="Direccion" class="form-control" />
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="Email" class="control-label">Email: </label>
+                        </div>
+                        <div class="col-8 text-start">
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="IdCargo" class="control-label">Cargo: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            @Html.DropDownListFor(
+                                                        model => model.IdCargo,
+                                                        ViewBag.cargo as SelectList,
+                                                        "-- Seleccione --",
+                                                        new { @class = "form-select" }
+                                                        )
+                            <span asp-validation-for="IdCargo" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="FecIngreso" class="control-label">Fec Ingreso: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            <input asp-for="FecIngreso" class="form-control" />
+                            <span asp-validation-for="FecIngreso" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row align-items-start">
+                        <div class="col-2 text-end">
+                            <label asp-for="IdSistemaPension" class="control-label">Sist. Pensión: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            @Html.DropDownListFor(
+                                                        model => model.IdSistemaPension,
+                                                        ViewBag.sistPension as SelectList,
+                                                        "-- Seleccione --",
+                                                        new { @class = "form-select" }
+                                                        )
+                            <span asp-validation-for="IdSistemaPension" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 text-end">
+                            <label asp-for="IdSituacion" class="control-label">Situación: </label>
+                        </div>
+                        <div class="col-3 text-start">
+                            @Html.DropDownListFor(
+                                                        model => model.IdSituacion,
+                                                        ViewBag.situacion as SelectList,
+                                                        "-- Seleccione --",
+                                                        new { @class = "form-select" }
+                                                        )
+                            <span asp-validation-for="IdSituacion" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <label asp-for="Foto" class="control-label"></label>
+                <input asp-for="Foto" class="form-control" />
+                <span asp-validation-for="Foto" class="text-danger"></span>
+
+                <div class="footer">
+                    <input type="button" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+
+
+    </form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
