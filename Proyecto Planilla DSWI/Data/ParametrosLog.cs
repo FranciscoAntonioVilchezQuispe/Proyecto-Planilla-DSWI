@@ -15,8 +15,7 @@ namespace Proyecto_Planilla_DSWI.Data
                               VALUES
                               (@RemBasico, @PorcAsigancionFamiliar, @PorcExtra1, @PorcExtra2,
                                @FecCreacion, @Activo);
-                               SELECT LAST_INSERT_ID();";  // Cambiado SCOPE_IDENTITY() por LAST_INSERT_ID()
-
+                               SELECT LAST_INSERT_ID();";  
             new AuditoriaLog().SetAuditFieldsForInsert(obj);
 
             var parameters = new MySqlParameter[]
@@ -86,16 +85,17 @@ namespace Proyecto_Planilla_DSWI.Data
             return ADOConnection.MapDataTableToList<Parametros>(dataTable);
         }
 
+       
         public Parametros BusquedaOne()
         {
-            string cadena = $@"SELECT TOP 1 * FROM Parametros";
+            string query = "SELECT TOP 1 * FROM Parametros WHERE Activo = 1"; 
+                                                                              
+                                                                              
 
-            var dataTable = ADOConnection.ExecuteDataTable(cadena);
-            if (dataTable.Rows.Count > 0)
-            {
-                return ADOConnection.MapDataRowToObject<Parametros>(dataTable.Rows[0]);
-            }
-            return null;
+            var dataTable = ADOConnection.ExecuteDataTable(query);
+            return dataTable.Rows.Count > 0
+                ? ADOConnection.MapDataRowToObject<Parametros>(dataTable.Rows[0])
+                : new Parametros();
         }
     }
 } 
