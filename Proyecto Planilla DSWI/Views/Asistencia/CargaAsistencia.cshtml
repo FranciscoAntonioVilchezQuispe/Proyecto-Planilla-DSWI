@@ -1,0 +1,185 @@
+﻿@model List<Proyecto_Planilla_DSWI.Utils.Response.AsistenciaTrabajadorResponse>
+@{
+    ViewData["Title"] = "Carga de Asistencia";
+}
+<div class="container mt-4">
+    <h2>Carga Asistencia</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Período</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="BuscarAsistencia" method="post" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Año</label>
+                    <select name="año" class="form-select" asp-items="@(new SelectList(ViewBag.Años, "Id", "Nombre", ViewBag.AñoSeleccionado))"></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Mes</label>
+                    <select name="mes" class="form-select" asp-items="@(new SelectList(ViewBag.Meses, "Id", "Nombre", ViewBag.MesSeleccionado))"></select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Gestión de Archivos Excel</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Sección de Descarga -->
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6>Descarga de Excel</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column gap-2">
+                                @if (Model != null && Model.Any())
+                                {
+                                    <form asp-action="DescargarExcel" method="post">
+                                        <input type="hidden" name="año" value="@ViewBag.AñoSeleccionado" />
+                                        <input type="hidden" name="mes" value="@ViewBag.MesSeleccionado" />
+                                        @for (int i = 0; i < Model.Count; i++)
+                                        {
+                                            <input type="hidden" name="datos[@i].IdTrabajador" value="@Model[i].IdTrabajador" />
+                                            <input type="hidden" name="datos[@i].Documento" value="@Model[i].Documento" />
+                                            <input type="hidden" name="datos[@i].Nombre" value="@Model[i].Nombre" />
+                                            <input type="hidden" name="datos[@i].DiasLaborales" value="@Model[i].DiasLaborales" />
+                                            <input type="hidden" name="datos[@i].DiasDescanso" value="@Model[i].DiasDescanso" />
+                                            <input type="hidden" name="datos[@i].DiasInasistencia" value="@Model[i].DiasInasistencia" />
+                                            <input type="hidden" name="datos[@i].DiasFeriados" value="@Model[i].DiasFeriados" />
+                                            <input type="hidden" name="datos[@i].HorasExtra25" value="@Model[i].HorasExtra25" />
+                                            <input type="hidden" name="datos[@i].HorasExtra35" value="@Model[i].HorasExtra35" />
+                                        }
+                                        <button type="submit" class="btn btn-success w-100">Descargar Datos Actuales</button>
+                                    </form>
+                                }
+
+                                <form asp-action="DescargarExcel" method="post">
+                                    <input type="hidden" name="año" value="@ViewBag.AñoSeleccionado" />
+                                    <input type="hidden" name="mes" value="@ViewBag.MesSeleccionado" />
+                                    <button type="submit" class="btn btn-outline-secondary w-100">Descargar Plantilla</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Carga -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6>Carga de Excel</h6>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="CargarExcel" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="año" value="@ViewBag.AñoSeleccionado" />
+                                <input type="hidden" name="mes" value="@ViewBag.MesSeleccionado" />
+                                @if (Model != null)
+                                {
+                                    for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        <input type="hidden" name="datosActuales[@i].IdTrabajador" value="@Model[i].IdTrabajador" />
+                                        <input type="hidden" name="datosActuales[@i].Documento" value="@Model[i].Documento" />
+                                        <input type="hidden" name="datosActuales[@i].Nombre" value="@Model[i].Nombre" />
+                                        <input type="hidden" name="datosActuales[@i].DiasLaborales" value="@Model[i].DiasLaborales" />
+                                        <input type="hidden" name="datosActuales[@i].DiasDescanso" value="@Model[i].DiasDescanso" />
+                                        <input type="hidden" name="datosActuales[@i].DiasInasistencia" value="@Model[i].DiasInasistencia" />
+                                        <input type="hidden" name="datosActuales[@i].DiasFeriados" value="@Model[i].DiasFeriados" />
+                                        <input type="hidden" name="datosActuales[@i].HorasExtra25" value="@Model[i].HorasExtra25" />
+                                        <input type="hidden" name="datosActuales[@i].HorasExtra35" value="@Model[i].HorasExtra35" />
+                                    }
+                                }
+                                <div class="mb-3">
+                                    <label class="form-label">Seleccione archivo Excel</label>
+                                    <input type="file" name="archivoExcel" class="form-control" accept=".xlsx" required />
+                                </div>
+                                <button type="submit" class="btn btn-info w-100">Cargar Excel</button>
+                                <small class="text-muted">Formato compatible: .xlsx</small>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="card">
+            <div class="card-header">
+                <h5>Datos de Asistencia</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="GrabarAsistencia" method="post">
+                    <input type="hidden" name="año" value="@ViewBag.AñoSeleccionado" />
+                    <input type="hidden" name="mes" value="@ViewBag.MesSeleccionado" />
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>DNI</th>
+                                    <th>Nombre</th>
+                                    <th>Dias Laborales</th>
+                                    <th>Dias Descanso</th>
+                                    <th>Dias Inasistencia</th>
+                                    <th>Dias Feriados</th>
+                                    <th>Horas Extra 25%</th>
+                                    <th>Horas Extra 35%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Model[i].Documento
+                                            <input type="hidden" name="datos[@i].IdTrabajador" value="@Model[i].IdTrabajador" />
+                                        </td>
+                                        <td>@Model[i].Nombre</td>
+                                        <td>
+                                            <input type="number" name="datos[@i].DiasLaborales" value="@Model[i].DiasLaborales" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="datos[@i].DiasDescanso" value="@Model[i].DiasDescanso" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="datos[@i].DiasInasistencia" value="@Model[i].DiasInasistencia" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" name="datos[@i].DiasFeriados" value="@Model[i].DiasFeriados" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" name="datos[@i].HorasExtra25" value="@Model[i].HorasExtra25" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" name="datos[@i].HorasExtra35" value="@Model[i].HorasExtra35" class="form-control" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="submit" class="btn btn-primary">Grabar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div>
