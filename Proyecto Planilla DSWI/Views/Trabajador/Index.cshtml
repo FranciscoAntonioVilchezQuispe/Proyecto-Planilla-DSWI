@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Proyecto_Planilla_DSWI.Models.Trabajadores>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="NuevoRegistro">Nuevo registro</a>
+</p>
+<br />
+<form>
+    <div class="row">
+        <div class="col-md-3">
+            <label class="form-label">Nr. Doc o Nombre :</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="busqueda" class="form-control" />
+        </div>
+    </div>
+    <br />
+    <input class="btn btn-sm btn-outline-primary" type="submit" value="Consultar" />
+    <br />
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Documento)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombres)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ApellidoPaterno)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ApellidoMaterno)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Documento)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombres)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApellidoPaterno)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ApellidoMaterno)
+                </td>
+                <td>
+                    @Html.ActionLink("Editar", "EditarRegistro", new { busqueda = item.Documento }) |
+
+                    @Html.ActionLink("Eliminar", "EliminarRegistro", new { /* id=item.PrimaryKey */ })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<p>
+    <strong>Cant. Pag.: @ViewBag.totalPaginas</strong>
+</p>
+<br />
+<div class="pagination pagination-sm">
+    @for (int x = 1; x <= ViewBag.totalPaginas; x++)
+    {
+        <a class="page-link"
+           asp-action="Index"
+           asp-route-page="@x">
+            @x
+        </a>
+    }
+</div>
