@@ -1,9 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto Planilla DSWI", "Proyecto Planilla DSWI\Proyecto Planilla DSWI.csproj", "{455EBA3C-D466-42DF-9CED-348832C2838F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Web", "ProyectoPlanilla.Web", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Api", "ProyectoPlanilla.Api", "{BCF66AE9-649B-43ED-89DA-4B62B541F0D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Business", "ProyectoPlanilla.Business", "{DF145AD6-D7B7-4C5C-842F-39DE926121D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Data", "ProyectoPlanilla.Data", "{5BC309F1-B71D-4398-87E9-7675FF4CA2BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Entities", "ProyectoPlanilla.Entities", "{A90B92B8-B2A8-4208-A150-2574B33CE22D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Common", "ProyectoPlanilla.Common", "{400B24AE-3785-4A16-B3E5-EB603E858CDC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProyectoPlanilla.Infraestructure", "ProyectoPlanilla.Infraestructure", "{C982CA0E-9D8A-4107-94F0-E381890B9DFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

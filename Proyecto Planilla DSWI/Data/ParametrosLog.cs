@@ -88,7 +88,7 @@ namespace Proyecto_Planilla_DSWI.Data
        
         public Parametros BusquedaOne()
         {
-            string query = "SELECT TOP 1 * FROM Parametros WHERE Activo = 1"; 
+            string query = "SELECT * FROM Parametros WHERE Activo = 1 LIMIT 1;"; 
                                                                               
                                                                               
 
