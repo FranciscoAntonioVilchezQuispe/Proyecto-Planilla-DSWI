@@ -1,14 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using Proyecto_Planilla_DSWI.Models;
 using Proyecto_Planilla_DSWI.Utils;
 using Proyecto_Planilla_DSWI.Utils.Request;
-using Newtonsoft.Json;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class TrabajadorController : Controller
     {
+        private readonly IConfiguration _config;
+        private readonly string baseAddress;
         public HttpClient _httpClient;
         Trabajadores objTrabajador = new Trabajadores();
         List<Cargos> ArrCargos = new List<Cargos>();
@@ -18,16 +21,19 @@ namespace Proyecto_Planilla_DSWI.Controllers
         List<EstadosCiviles> ArrEstadocivil = new List<EstadosCiviles>();
         List<SistemaPensiones> ArrSistemaPensiones = new List<SistemaPensiones>();
 
-        public TrabajadorController()
+        public TrabajadorController(IConfiguration config)
         {
             _httpClient = new HttpClient();
+            _config = config;
+            baseAddress = _config["ApiService:URL"].ToString();
         }
+
         async Task CargarParametros()
         {
             try
             {
                 HttpResponseMessage response = new HttpResponseMessage();
-                response = await _httpClient.GetAsync($"{GlobalConstantes.ApiParametro}ParametrosFormularioTrabajador");
+                response = await _httpClient.GetAsync($"{baseAddress}{GlobalConstantes.ApiParametro}ParametrosFormularioTrabajador");
                 if (!response.IsSuccessStatusCode) throw new Exception("Error: " + response.RequestMessage.ToString());
                 using (HttpContent content = response.Content)
                 {
@@ -63,7 +69,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
 
             try
             {
-                response = await _httpClient.PostAsJsonAsync($"{GlobalConstantes.ApiTrabajador}BusquedaTrabajadores", new BuquedaTrabajador { Busqueda = busqueda, Estado = GlobalEnum._Estado.Todos });
+                response = await _httpClient.PostAsJsonAsync($"{baseAddress}{GlobalConstantes.ApiTrabajador}BusquedaTrabajadores", new BuquedaTrabajador { Busqueda = busqueda, Estado = GlobalEnum._Estado.Todos });
                 if (!response.IsSuccessStatusCode) throw new Exception("Error: " + response.RequestMessage.ToString());
                 using (HttpContent content = response.Content)
                 {
@@ -159,11 +165,11 @@ namespace Proyecto_Planilla_DSWI.Controllers
             {
                 if (newTrabajador.IdTrabajador == 0)
                 {
-                    response = await _httpClient.PostAsJsonAsync($"{GlobalConstantes.ApiTrabajador}Insert", newTrabajador);
+                    response = await _httpClient.PostAsJsonAsync($"{baseAddress}{GlobalConstantes.ApiTrabajador}Insert", newTrabajador);
                 }
                 else
                 {
-                    response = await _httpClient.PostAsJsonAsync($"{GlobalConstantes.ApiTrabajador}Update", newTrabajador);
+                    response = await _httpClient.PostAsJsonAsync($"{baseAddress}{GlobalConstantes.ApiTrabajador}Update", newTrabajador);
                 }
 
                 if (!response.IsSuccessStatusCode) throw new Exception("Error: " + response.RequestMessage.ToString());

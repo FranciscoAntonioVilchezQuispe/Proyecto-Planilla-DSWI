@@ -2,18 +2,18 @@
 {
     public class GlobalConstantes
     {
-        public static string Url = "https://localhost:7000/";
-        public static string ApiCargo = $"{Url}api/Cargos/";
-        public static string ApiGenero = $"{Url}api/Generos/";
-        public static string ApiEstadoCivil = $"{Url}api/EstadosCiviles/";
-        public static string ApiParametro = $"{Url}api/Parametros/";
-        public static string ApiSistemaPensiones = $"{Url}api/SistemaPension/";
-        public static string ApiTipoDocumento = $"{Url}api/TipoDocumento/";
-        public static string ApiSituacionTrabajador = $"{Url}api/Situacion/";
-        public static string ApiTrabajador = $"{Url}api/Trabajador/";
-        public static string ApiIngresosTrabajadores = $"{Url}api/IngresosTrabajadores/";
-        public static string ApiAsistenciaTrabajador = $"{Url}api/AsistenciaTrabajador/";
-        public static string ApiPlanillaMensual = $"{Url}api/PlanillaMensual/";
+        //public static string Url = "https://localhost:7000/";
+        public static string ApiCargo = $"/Cargos/";
+        public static string ApiGenero = $"/Generos/";
+        public static string ApiEstadoCivil = $"/EstadosCiviles/";
+        public static string ApiParametro = $"/Parametros/";
+        public static string ApiSistemaPensiones = $"/SistemaPension/";
+        public static string ApiTipoDocumento = $"/TipoDocumento/";
+        public static string ApiSituacionTrabajador = $"/Situacion/";
+        public static string ApiTrabajador = $"/Trabajador/";
+        public static string ApiIngresosTrabajadores = $"/IngresosTrabajadores/";
+        public static string ApiAsistenciaTrabajador = $"/AsistenciaTrabajador/";
+        public static string ApiPlanillaMensual = $"/PlanillaMensual/";
 
         #region Auditoria
         public const string AuditoriaUpdate = ",FecUltimaModificacion = @FecUltimaModificacion ";
