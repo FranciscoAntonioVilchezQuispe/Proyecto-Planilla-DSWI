@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
+using OfficeOpenXml;
 using Proyecto_Planilla_DSWI.Models;
 using Proyecto_Planilla_DSWI.Utils.Request;
 using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
@@ -10,9 +12,10 @@ namespace Proyecto_Planilla_DSWI.Data
     {
         public List<PlanillaMensual> CalcularPlanillaByPeriodo(int año, int mes)
         {
+ 
             List<PlanillaMensual> arr = new List<PlanillaMensual>();
-            var parametro = new ParametrosLog().BusquedaOne();
-            var Arrtrabajador = new TrabajadorLog().Busqueda(new BuquedaTrabajador { Busqueda = "", Estado = _Estado.Activo });
+            var parametro = new ParametrosLog().BusquedaOne() ?? throw new Exception("No se encontraron parámetros del sistema"); ;
+            var Arrtrabajador = new TrabajadorLog().Busqueda(new BuquedaTrabajador { Busqueda = "", Estado = _Estado.Activo }) ?? throw new Exception("Error al obtener trabajadores");
             var ArrIngresos = new IngresosTrabajadoresLog().Busqueda();
             var ArrAsistencia = new AsistenciaTrabajadorLog().BuscarAsistenciaByPeriodo(año, mes);
             var ArrSistemaPension = new SistemaPensionLog().Busqueda();
@@ -78,127 +81,238 @@ namespace Proyecto_Planilla_DSWI.Data
                 obj.TotalNetoBoletaCad = Utils.NumberToLetters.ToCardinal((decimal)obj.TotalNetoBoleta) + " SOLES";
                 arr.Add(obj);
             }
-
             return arr;
+            
         }
 
+        
         public bool InsertarLista(List<PlanillaMensual> arr)
+
         {
+            Console.WriteLine($"=== INICIO InsertarLista ===");
+            Console.WriteLine($"Número de elementos recibidos: {arr?.Count ?? 0}");
+
             if (arr == null || arr.Count == 0)
+            {
+                Console.WriteLine("ERROR: Lista nula o vacía");
                 return false;
-
-            // Configurar auditoría para todos los elementos
-            foreach (var item in arr)
-            {
-                new AuditoriaLog().SetAuditFieldsForInsert(item);
             }
-
-            // Eliminar registros existentes del período
-            string deleteSql = "DELETE FROM PlanillaMensual WHERE Año = @Año AND Mes = @Mes";
-            var deleteParameters = new MySqlParameter[]
+            try
             {
-                new MySqlParameter("@Año", arr[0].Año),
-                new MySqlParameter("@Mes", arr[0].Mes)
-            };
-
-            ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
-
-            // Insertar nuevos registros
-            string insertSql = $@"INSERT INTO PlanillaMensual
-                                 (Año, Mes, IdTrabajador, IdSituacion, IdCargo, Apellido, Nombre, IdSistemaPension, IdEstadoCivil,
-                                  Hijos, FechaIngreso, SueldoBasico, PorcHoraExtra1, PorcHoraExtra2, PorcDescansoTrab, PorcFeriadoTrab, 
-                                  PorcAsigFamiliar, nHorasNormal, nHorasExtra1, nHorasExtra2, nDiasTrab, nDiasDescansos, nFeriadosTrab, 
-                                  nDescansosTrab, nDiasInasistencias, HaberBasico, ValesEmpleado, vHorasExtra1, vHorasExtra2, vAsigFamiliar, 
-                                  vDescansoTrab, vFeriadoTrab, BonificacionCargo, BonificacionMovilidad, CanastaNavidad, Escolaridad,
-                                  DiaTrabajador, TotalIngreso, PorcAporte, Aporte, PorcComision, Comision, PorcPrima, Prima, 
-                                  TotalDescuento, TotalNetoBoleta, TotalNetoBoletaCad, FecCreacion, Activo)
-                                 VALUES
-                                 (@Año, @Mes, @IdTrabajador, @IdSituacion, @IdCargo, @Apellido, @Nombre, @IdSistemaPension, @IdEstadoCivil,
-                                  @Hijos, @FechaIngreso, @SueldoBasico, @PorcHoraExtra1, @PorcHoraExtra2, @PorcDescansoTrab, @PorcFeriadoTrab,
-                                  @PorcAsigFamiliar, @nHorasNormal, @nHorasExtra1, @nHorasExtra2, @nDiasTrab, @nDiasDescansos, @nFeriadosTrab,
-                                  @nDescansosTrab, @nDiasInasistencias, @HaberBasico, @ValesEmpleado, @vHorasExtra1, @vHorasExtra2, @vAsigFamiliar,
-                                  @vDescansoTrab, @vFeriadoTrab, @BonificacionCargo, @BonificacionMovilidad, @CanastaNavidad, @Escolaridad,
-                                  @DiaTrabajador, @TotalIngreso, @PorcAporte, @Aporte, @PorcComision, @Comision, @PorcPrima, @Prima,
-                                  @TotalDescuento, @TotalNetoBoleta, @TotalNetoBoletaCad, @FecCreacion, @Activo)";
-
-            using (var connection = new SqlConnection(ADOConnection.ConnectionString))
-            {
-                connection.Open();
-                using (var transaction = connection.BeginTransaction())
+                // Validación inicial mejorada
+                if (arr == null || arr.Count == 0)
                 {
-                    try
-                    {
-                        foreach (var item in arr)
-                        {
-                            using (var command = new SqlCommand(insertSql, connection, transaction))
-                            {
-                                command.Parameters.AddRange(new MySqlParameter[]
-                                {
-                                    new MySqlParameter("@Año", item.Año),
-                                    new MySqlParameter("@Mes", item.Mes),
-                                    new MySqlParameter("@IdTrabajador", item.IdTrabajador),
-                                    new MySqlParameter("@IdSituacion", item.IdSituacion),
-                                    new MySqlParameter("@IdCargo", item.IdCargo),
-                                    new MySqlParameter("@Apellido", item.Apellido),
-                                    new MySqlParameter("@Nombre", item.Nombre),
-                                    new MySqlParameter("@IdSistemaPension", item.IdSistemaPension),
-                                    new MySqlParameter("@IdEstadoCivil", item.IdEstadoCivil),
-                                    new MySqlParameter("@Hijos", item.Hijos),
-                                    new MySqlParameter("@FechaIngreso", item.FechaIngreso),
-                                    new MySqlParameter("@SueldoBasico", item.SueldoBasico),
-                                    new MySqlParameter("@PorcHoraExtra1", item.PorcHoraExtra1),
-                                    new MySqlParameter("@PorcHoraExtra2", item.PorcHoraExtra2),
-                                    new MySqlParameter("@PorcDescansoTrab", item.PorcDescansoTrab),
-                                    new MySqlParameter("@PorcFeriadoTrab", item.PorcFeriadoTrab),
-                                    new MySqlParameter("@PorcAsigFamiliar", item.PorcAsigFamiliar),
-                                    new MySqlParameter("@nHorasNormal", item.nHorasNormal),
-                                    new MySqlParameter("@nHorasExtra1", item.nHorasExtra1),
-                                    new MySqlParameter("@nHorasExtra2", item.nHorasExtra2),
-                                    new MySqlParameter("@nDiasTrab", item.nDiasTrab),
-                                    new MySqlParameter("@nDiasDescansos", item.nDiasDescansos),
-                                    new MySqlParameter("@nFeriadosTrab", item.nFeriadosTrab),
-                                    new MySqlParameter("@nDescansosTrab", item.nDescansosTrab),
-                                    new MySqlParameter("@nDiasInasistencias", item.nDiasInasistencias),
-                                    new MySqlParameter("@HaberBasico", item.HaberBasico),
-                                    new MySqlParameter("@ValesEmpleado", item.ValesEmpleado),
-                                    new MySqlParameter("@vHorasExtra1", item.vHorasExtra1),
-                                    new MySqlParameter("@vHorasExtra2", item.vHorasExtra2),
-                                    new MySqlParameter("@vAsigFamiliar", item.vAsigFamiliar),
-                                    new MySqlParameter("@vDescansoTrab", item.vDescansoTrab),
-                                    new MySqlParameter("@vFeriadoTrab", item.vFeriadoTrab),
-                                    new MySqlParameter("@BonificacionCargo", item.BonificacionCargo),
-                                    new MySqlParameter("@BonificacionMovilidad", item.BonificacionMovilidad),
-                                    new MySqlParameter("@CanastaNavidad", item.CanastaNavidad),
-                                    new MySqlParameter("@Escolaridad", item.Escolaridad),
-                                    new MySqlParameter("@DiaTrabajador", item.DiaTrabajador),
-                                    new MySqlParameter("@TotalIngreso", item.TotalIngreso),
-                                    new MySqlParameter("@PorcAporte", item.PorcAporte),
-                                    new MySqlParameter("@Aporte", item.Aporte),
-                                    new MySqlParameter("@PorcComision", item.PorcComision),
-                                    new MySqlParameter("@Comision", item.Comision),
-                                    new MySqlParameter("@PorcPrima", item.PorcPrima),
-                                    new MySqlParameter("@Prima", item.Prima),
-                                    new MySqlParameter("@TotalDescuento", item.TotalDescuento),
-                                    new MySqlParameter("@TotalNetoBoleta", item.TotalNetoBoleta),
-                                    new MySqlParameter("@TotalNetoBoletaCad", item.TotalNetoBoletaCad),
-                                    new MySqlParameter("@FecCreacion", item.FecCreacion),
-                                    new MySqlParameter("@Activo", item.Activo)
-                                });
-                                command.ExecuteNonQuery();
-                            }
-                        }
+                    Console.WriteLine("Array de planillas es nulo o vacío");
+                    return false;
+                }
 
-                        transaction.Commit();
-                        return true;
-                    }
-                    catch
+                // Log del primer elemento para diagnóstico
+
+                var primerElemento = arr.FirstOrDefault();
+                Console.WriteLine("=== DATOS DEL PRIMER ELEMENTO ===");
+                Console.WriteLine($"Año: {primerElemento?.Año}");
+                Console.WriteLine($"Mes: {primerElemento?.Mes}");
+                Console.WriteLine($"Trabajador: {primerElemento?.Nombre} {primerElemento?.Apellido}");
+                Console.WriteLine($"Sueldo Básico: {primerElemento?.SueldoBasico}");
+                Console.WriteLine("================================");
+
+
+                // Validar período coherente
+                if (arr.Any(x => x.Año <= 0 || x.Mes <= 0 || x.Mes > 12))
+                {
+                    Console.WriteLine("Período inválido detectado en algunos registros");
+                    throw new ArgumentException("Período inválido en los registros");
+                }
+
+                // Configurar auditoría
+                Console.WriteLine("Configurando campos de auditoría...");
+                foreach (var item in arr)
+                {
+                    new AuditoriaLog().SetAuditFieldsForInsert(item);
+                    Console.WriteLine($"Auditoría configurada para: {item.Nombre} {item.Apellido}");
+                }
+
+                // Eliminar registros existentes con mejor logging
+                Console.WriteLine($"Eliminando registros existentes para año: {arr[0].Año}, mes: {arr[0].Mes}");
+                string deleteSql = "DELETE FROM PlanillaMensual WHERE Año = @Año AND Mes = @Mes";
+                var deleteParameters = new MySqlParameter[]
+                {
+            new MySqlParameter("@Año", arr[0].Año),
+            new MySqlParameter("@Mes", arr[0].Mes)
+                };
+
+                bool success = ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
+                Console.WriteLine($"Operación de eliminación {(success ? "exitosa" : "fallida")}");
+
+                // Insertar nuevos registros
+                string insertSql = @"
+                                    INSERT INTO PlanillaMensual
+                                    (
+                                        `Año`, `Mes`, IdTrabajador, IdSituacion, IdCargo, Apellido, Nombre,
+                                        IdSistemaPension, IdEstadoCivil, Hijos, FechaIngreso, SueldoBasico,
+                                        PorcHoraExtra1, PorcHoraExtra2, PorcDescansoTrab, PorcFeriadoTrab,
+                                        PorcAsigFamiliar, nHorasNormal, nHorasExtra1, nHorasExtra2, nDiasTrab,
+                                        nDiasDescansos, nFeriadosTrab, nDescansosTrab, nDiasInasistencias,
+                                        HaberBasico, ValesEmpleado, vHorasExtra1, vHorasExtra2, vAsigFamiliar,
+                                        vDescansoTrab, vFeriadoTrab, BonificacionCargo, BonificacionMovilidad,
+                                        CanastaNavidad, Escolaridad, DiaTrabajador, TotalIngreso,
+                                        Renta5ta, DescuentoJud1, DescuentoJud2, DescuentoJud3, OtrosAdelantos,
+                                        AdelantoCaja, AdelantoQuincena, AdelantoVac, AdelantoGratificacion,
+                                        AdelantoLiquidacion, AdelantoCTS,
+                                        PorcAporte, Aporte, PorcComision, Comision, PorcPrima, Prima,
+                                        OTDSeg, OTDPacifico, IdBanco1, Prestamo1, Tardanza,
+                                        TotalDescuento, PorcEsSalud, EsSalud, AccidenteTrab, Senati, SeguroVidaLey,
+                                        TotalNeto, TotalNetoCad, TotalNetoBoleta, TotalNetoBoletaCad,
+                                        Activo, FecCreacion, FecUltimaModificacion
+                                    )
+                                    VALUES
+                                    (
+                                        @Año, @Mes, @IdTrabajador, @IdSituacion, @IdCargo, @Apellido, @Nombre,
+                                        @IdSistemaPension, @IdEstadoCivil, @Hijos, @FechaIngreso, @SueldoBasico,
+                                        @PorcHoraExtra1, @PorcHoraExtra2, @PorcDescansoTrab, @PorcFeriadoTrab,
+                                        @PorcAsigFamiliar, @nHorasNormal, @nHorasExtra1, @nHorasExtra2, @nDiasTrab,
+                                        @nDiasDescansos, @nFeriadosTrab, @nDescansosTrab, @nDiasInasistencias,
+                                        @HaberBasico, @ValesEmpleado, @vHorasExtra1, @vHorasExtra2, @vAsigFamiliar,
+                                        @vDescansoTrab, @vFeriadoTrab, @BonificacionCargo, @BonificacionMovilidad,
+                                        @CanastaNavidad, @Escolaridad, @DiaTrabajador, @TotalIngreso,
+                                        @Renta5ta, @DescuentoJud1, @DescuentoJud2, @DescuentoJud3, @OtrosAdelantos,
+                                        @AdelantoCaja, @AdelantoQuincena, @AdelantoVac, @AdelantoGratificacion,
+                                        @AdelantoLiquidacion, @AdelantoCTS,
+                                        @PorcAporte, @Aporte, @PorcComision, @Comision, @PorcPrima, @Prima,
+                                        @OTDSeg, @OTDPacifico, @IdBanco1, @Prestamo1, @Tardanza,
+                                        @TotalDescuento, @PorcEsSalud, @EsSalud, @AccidenteTrab, @Senati, @SeguroVidaLey,
+                                        @TotalNeto, @TotalNetoCad, @TotalNetoBoleta, @TotalNetoBoletaCad,
+                                        @Activo, @FecCreacion, @FecUltimaModificacion
+                                    )";
+
+                using (var connection = new MySqlConnection(ADOConnection.ConnectionString))
+                {
+                    connection.Open();
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        transaction.Rollback();
-                        throw;
+                        try
+                        {
+                            foreach (var planilla in arr)
+                            {
+                                Console.WriteLine($"Procesando: {planilla.Nombre} {planilla.Apellido}");
+
+                                // Validación de datos críticos
+                                if (planilla.SueldoBasico == null || planilla.SueldoBasico <= 0)
+                                {
+                                    Console.WriteLine($"Advertencia: Sueldo básico inválido para {planilla.Nombre} {planilla.Apellido}");
+                                }
+
+                                var parameters = new MySqlParameter[]
+                                {
+
+                                new MySqlParameter("@Año", planilla.Año ?? (object)DBNull.Value),
+                                new MySqlParameter("@Mes", planilla.Mes ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdTrabajador", planilla.IdTrabajador ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdSituacion", planilla.IdSituacion ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdCargo", planilla.IdCargo ?? (object)DBNull.Value),
+                                new MySqlParameter("@Apellido", planilla.Apellido ?? (object)DBNull.Value),
+                                new MySqlParameter("@Nombre", planilla.Nombre ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdSistemaPension", planilla.IdSistemaPension ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdEstadoCivil", planilla.IdEstadoCivil ?? (object)DBNull.Value),
+                                new MySqlParameter("@Hijos", planilla.Hijos ?? (object)DBNull.Value),
+                                new MySqlParameter("@FechaIngreso", planilla.FechaIngreso ?? (object)DBNull.Value),
+                                new MySqlParameter("@SueldoBasico", planilla.SueldoBasico ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcHoraExtra1", planilla.PorcHoraExtra1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcHoraExtra2", planilla.PorcHoraExtra2 ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcDescansoTrab", planilla.PorcDescansoTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcFeriadoTrab", planilla.PorcFeriadoTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcAsigFamiliar", planilla.PorcAsigFamiliar ?? (object)DBNull.Value),
+                                new MySqlParameter("@nHorasNormal", planilla.nHorasNormal ?? (object)DBNull.Value),
+                                new MySqlParameter("@nHorasExtra1", planilla.nHorasExtra1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@nHorasExtra2", planilla.nHorasExtra2 ?? (object)DBNull.Value),
+                                new MySqlParameter("@nDiasTrab", planilla.nDiasTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@nDiasDescansos", planilla.nDiasDescansos ?? (object)DBNull.Value),
+                                new MySqlParameter("@nFeriadosTrab", planilla.nFeriadosTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@nDescansosTrab", planilla.nDescansosTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@nDiasInasistencias", planilla.nDiasInasistencias ?? (object)DBNull.Value),
+                                new MySqlParameter("@HaberBasico", planilla.HaberBasico ?? (object)DBNull.Value),
+                                new MySqlParameter("@ValesEmpleado", planilla.ValesEmpleado ?? (object)DBNull.Value),
+                                new MySqlParameter("@vHorasExtra1", planilla.vHorasExtra1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@vHorasExtra2", planilla.vHorasExtra2 ?? (object)DBNull.Value),
+                                new MySqlParameter("@vAsigFamiliar", planilla.vAsigFamiliar ?? (object)DBNull.Value),
+                                new MySqlParameter("@vDescansoTrab", planilla.vDescansoTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@vFeriadoTrab", planilla.vFeriadoTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@BonificacionCargo", planilla.BonificacionCargo ?? (object)DBNull.Value),
+                                new MySqlParameter("@BonificacionMovilidad", planilla.BonificacionMovilidad ?? (object)DBNull.Value),
+                                new MySqlParameter("@CanastaNavidad", planilla.CanastaNavidad ?? (object)DBNull.Value),
+                                new MySqlParameter("@Escolaridad", planilla.Escolaridad ?? (object)DBNull.Value),
+                                new MySqlParameter("@DiaTrabajador", planilla.DiaTrabajador ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalIngreso", planilla.TotalIngreso ?? (object)DBNull.Value),
+                                new MySqlParameter("@Renta5ta", planilla.Renta5ta ?? (object)DBNull.Value),
+                                new MySqlParameter("@DescuentoJud1", planilla.DescuentoJud1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@DescuentoJud2", planilla.DescuentoJud2 ?? (object)DBNull.Value),
+                                new MySqlParameter("@DescuentoJud3", planilla.DescuentoJud3 ?? (object)DBNull.Value),
+                                new MySqlParameter("@OtrosAdelantos", planilla.OtrosAdelantos ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoCaja", planilla.AdelantoCaja ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoQuincena", planilla.AdelantoQuincena ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoVac", planilla.AdelantoVac ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoGratificacion", planilla.AdelantoGratificacion ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoLiquidacion", planilla.AdelantoLiquidacion ?? (object)DBNull.Value),
+                                new MySqlParameter("@AdelantoCTS", planilla.AdelantoCTS ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcAporte", planilla.PorcAporte ?? (object)DBNull.Value),
+                                new MySqlParameter("@Aporte", planilla.Aporte ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcComision", planilla.PorcComision ?? (object)DBNull.Value),
+                                new MySqlParameter("@Comision", planilla.Comision ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcPrima", planilla.PorcPrima ?? (object)DBNull.Value),
+                                new MySqlParameter("@Prima", planilla.Prima ?? (object)DBNull.Value),
+                                new MySqlParameter("@OTDSeg", planilla.OTDSeg ?? (object)DBNull.Value),
+                                new MySqlParameter("@OTDPacifico", planilla.OTDPacifico ?? (object)DBNull.Value),
+                                new MySqlParameter("@IdBanco1", planilla.IdBanco1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@Prestamo1", planilla.Prestamo1 ?? (object)DBNull.Value),
+                                new MySqlParameter("@Tardanza", planilla.Tardanza ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalDescuento", planilla.TotalDescuento ?? (object)DBNull.Value),
+                                new MySqlParameter("@PorcEsSalud", planilla.PorcEsSalud ?? (object)DBNull.Value),
+                                new MySqlParameter("@EsSalud", planilla.EsSalud ?? (object)DBNull.Value),
+                                new MySqlParameter("@AccidenteTrab", planilla.AccidenteTrab ?? (object)DBNull.Value),
+                                new MySqlParameter("@Senati", planilla.Senati ?? (object)DBNull.Value),
+                                new MySqlParameter("@SeguroVidaLey", planilla.SeguroVidaLey ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalNeto", planilla.TotalNeto ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalNetoCad", planilla.TotalNetoCad ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalNetoBoleta", planilla.TotalNetoBoleta ?? (object)DBNull.Value),
+                                new MySqlParameter("@TotalNetoBoletaCad", planilla.TotalNetoBoletaCad ?? (object)DBNull.Value),
+                                new MySqlParameter("@Activo", planilla.Activo),
+                                new MySqlParameter("@FecCreacion", planilla.FecCreacion ?? (object)DBNull.Value),
+                                new MySqlParameter("@FecUltimaModificacion", planilla.FecUltimaModificacion ?? (object)DBNull.Value)
+                                };
+                                
+               
+
+                                using (var command = new MySqlCommand(insertSql, connection, transaction))
+                                {
+                                    command.Parameters.AddRange(parameters);
+                                    int affectedRows = command.ExecuteNonQuery();
+                                    Console.WriteLine($"Insertado: {planilla.Nombre} {planilla.Apellido} - Filas afectadas: {affectedRows}");
+                                }
+                            }
+
+                            transaction.Commit();
+                            Console.WriteLine("Transacción completada con éxito");
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"ERROR durante la inserción: {ex.Message}");
+                            Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                            transaction.Rollback();
+                            throw new Exception("Error al guardar la planilla. Detalles: " + ex.Message);
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR GENERAL en InsertarLista: {ex.Message}");
+                throw;
+            }
         }
+
+        
+
 
         public List<PlanillaMensual> Lista(int año, int mes)
         {

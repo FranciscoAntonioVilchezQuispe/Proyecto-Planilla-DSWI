@@ -7,15 +7,26 @@ namespace Proyecto_Planilla_DSWI.Data
 {
     public class AsistenciaTrabajadorLog
     {
+
+
         public List<AsistenciaTrabajadorResponse> BuscarAsistenciaByPeriodo(int año, int mes)
         {
-            string cadena = $@"SELECT T.IdTrabajador, T.Documento, 
-                                     CONCAT(t.ApellidoPaterno, ' ', t.ApellidoMaterno, ' ', t.Nombres) AS Nombre,
-                                     a.DiasLaborales, a.DiasDescanso, a.DiasInasistencia, a.DiasFeriados, 
-                                     a.HorasExtra25, a.HorasExtra35
-                              FROM Trabajadores t
-                              LEFT JOIN (SELECT * FROM AsistenciasTrabajadores WHERE Año = @Año AND Mes = @Mes) a 
-                                   ON a.IdTrabajador = t.IdTrabajador";
+            string cadena = @"SELECT 
+                        t.IdTrabajador, 
+                        t.Documento, 
+                        CONCAT(t.ApellidoPaterno, ' ', t.ApellidoMaterno, ' ', t.Nombres) AS Nombre,
+                        IFNULL(a.DiasLaborales, 0) AS DiasLaborales,
+                        IFNULL(a.DiasDescanso, 0) AS DiasDescanso,
+                        IFNULL(a.DiasInasistencia, 0) AS DiasInasistencia,
+                        IFNULL(a.DiasFeriados, 0) AS DiasFeriados,
+                        IFNULL(a.HorasExtra25, 0.0) AS HorasExtra25,
+                        IFNULL(a.HorasExtra35, 0.0) AS HorasExtra35
+                      FROM Trabajadores t
+                      LEFT JOIN AsistenciasTrabajadores a 
+                        ON a.IdTrabajador = t.IdTrabajador 
+                        AND a.Año = @Año 
+                        AND a.Mes = @Mes";
+
 
             var parameters = new MySqlParameter[]
             {
@@ -32,13 +43,13 @@ namespace Proyecto_Planilla_DSWI.Data
             if (arr == null || arr.Count == 0)
                 return false;
 
-            // Configurar auditoría para todos los elementos
+         
             foreach (var item in arr)
             {
                 new AuditoriaLog().SetAuditFieldsForInsert(item);
             }
 
-            // Eliminar registros existentes del período
+  
             string deleteSql = "DELETE FROM AsistenciasTrabajadores WHERE Año = @Año AND Mes = @Mes";
             var deleteParameters = new MySqlParameter[]
             {
@@ -48,7 +59,7 @@ namespace Proyecto_Planilla_DSWI.Data
 
             ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
 
-            // Insertar nuevos registros
+  
             string insertSql = $@"INSERT INTO AsistenciasTrabajadores
                                  (IdTrabajador, Año, Mes, DiasLaborales, DiasDescanso,
                                   DiasInasistencia, DiasFeriados, HorasExtra25, HorasExtra35,
