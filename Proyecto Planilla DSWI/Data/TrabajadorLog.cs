@@ -131,7 +131,7 @@ namespace Proyecto_Planilla_DSWI.Data
                   WHERE (ApellidoPaterno LIKE CONCAT('%', @Busqueda, '%')
                      OR ApellidoMaterno LIKE CONCAT('%', @Busqueda, '%')
                      OR Nombres LIKE CONCAT('%', @Busqueda, '%')
-                     OR Documento LIKE CONCAT('%', @Busqueda, '%')
+                     OR Documento LIKE CONCAT('%', @Busqueda, '%'))
                      AND (@Estado = -1 OR Activo = @Estado)";
 
                 parameters.Add(new MySqlParameter("@Busqueda", obj.Busqueda));

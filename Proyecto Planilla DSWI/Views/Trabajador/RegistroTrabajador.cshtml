@@ -1,7 +1,9 @@
-﻿@model Proyecto_Planilla_DSWI.Models.Trabajadores
+﻿@model Trabajadores
+
 @{
-    ViewData["Title"] = "RegistroTrabajador";
+    ViewData["Title"] = "RegistroEmpleado";
 }
+
 <h1>@ViewBag.h1</h1>
 
 <hr />
@@ -21,7 +23,7 @@
                         </div>
                         <div class="col-3 text-start">
                             <select asp-for="IdTipoDocumento" asp-items="ViewBag.tipoDocumento"
-                                    class="form-select"></select>
+                                class="form-select"></select>
                             <span asp-validation-for="IdTipoDocumento" class="text-danger"></span>
                         </div>
                         <div class="col-2 text-end">
@@ -180,8 +182,8 @@
                 <span asp-validation-for="Foto" class="text-danger"></span>
 
                 <div class="footer">
-                    <input type="button" />
-                </div>
+                    <input type="button" id="test" />
+                </div>                
             </div>
         </div>
 
@@ -201,4 +203,12 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function () {
+            $("#test").hide();
+            //$("#IdTrabajador").hide();
+
+        }
+    </script>
 }
