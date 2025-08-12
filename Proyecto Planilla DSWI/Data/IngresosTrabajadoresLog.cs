@@ -74,7 +74,7 @@ namespace Proyecto_Planilla_DSWI.Data
 
         public IngresosTrabajadores BusquedaOne(int id)
         {
-            string cadena = $@"SELECT TOP 1 * FROM IngresosTrabajadores WHERE IdTrabajador = @IdTrabajador";
+            string cadena = $@"SELECT * FROM IngresosTrabajadores WHERE IdTrabajador = @IdTrabajador LIMIT 1";
 
             var parameters = new MySqlParameter[]
             {

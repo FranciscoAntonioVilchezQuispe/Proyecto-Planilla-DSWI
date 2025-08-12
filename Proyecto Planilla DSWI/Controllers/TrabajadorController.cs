@@ -18,6 +18,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
         private readonly GenerosLog _generosLog;
         private readonly EstadosCivilesLog _estadosCivilesLog;
         private readonly SistemaPensionLog _sistemaPensionLog;
+        private readonly IngresosTrabajadoresLog _ingresoLog;
 
         List<Cargos> ArrCargos = new List<Cargos>();
         List<SituacionTrabajador> ArrSituacion = new List<SituacionTrabajador>();
@@ -25,7 +26,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
         List<Generos> ArrGenero = new List<Generos>();
         List<EstadosCiviles> ArrEstadocivil = new List<EstadosCiviles>();
         List<SistemaPensiones> ArrSistemaPensiones = new List<SistemaPensiones>();
-
+        
         public TrabajadorController()
         {
             _trabajadorLog = new TrabajadorLog();
@@ -35,6 +36,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
             _generosLog = new GenerosLog();
             _estadosCivilesLog = new EstadosCivilesLog();
             _sistemaPensionLog = new SistemaPensionLog();
+            _ingresoLog = new IngresosTrabajadoresLog();
         }
 
         public async Task CargarParametros()
@@ -94,7 +96,6 @@ namespace Proyecto_Planilla_DSWI.Controllers
             }
         }
 
-
         public async Task<IActionResult> Index(string busqueda, int page = 1)
         {
             List<Trabajadores> Lista = new List<Trabajadores>();
@@ -137,17 +138,16 @@ namespace Proyecto_Planilla_DSWI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegistroTrabajador(Trabajadores newTrabajador)
+        public async Task<IActionResult> RegistroTrabajador(Trabajadores objTrabajador)
         {
-            int intResult = 0;
-
+            int intResult = 0;            
             try
             {
-                if (newTrabajador.IdTrabajador == 0)
-                    intResult = _trabajadorLog.Insert(newTrabajador);
+                if (objTrabajador.IdTrabajador == 0)
+                    intResult = _trabajadorLog.Insert(objTrabajador);
 
                 else
-                    intResult = _trabajadorLog.Update(newTrabajador);
+                    intResult = _trabajadorLog.Update(objTrabajador);
 
 
                 if (intResult == 0)
@@ -161,6 +161,33 @@ namespace Proyecto_Planilla_DSWI.Controllers
                 TempData["Error"] = ex.Message;
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        public IActionResult IngresoMensual(int id)
+        {
+            var obj = _ingresoLog.BusquedaOne(id);
+
+            if(obj == null)
+                return PartialView();
+            else
+                return PartialView(obj);
+        }
+
+        public IActionResult RegistroMensual(IngresosTrabajadores objIngreso)
+        {
+            int intResult = 0;
+            if (objIngreso.IdIngresoTrabajador == 0)
+                intResult = _ingresoLog.Insert(objIngreso);
+
+            else
+                intResult = _ingresoLog.Update(objIngreso);
+
+            if (intResult == 0)
+                throw new Exception("No se realizó el registro.");
+            else
+                objIngreso.IdIngresoTrabajador = intResult;
+
+            return PartialView(objIngreso);
         }
     }
 }
