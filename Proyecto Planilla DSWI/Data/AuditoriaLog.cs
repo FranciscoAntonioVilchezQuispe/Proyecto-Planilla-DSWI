@@ -1,4 +1,5 @@
-using Proyecto_Planilla_DSWI.Models;
+
+using Proyecto_Planilla_Entidades;
 
 namespace Proyecto_Planilla_DSWI.Data
 {

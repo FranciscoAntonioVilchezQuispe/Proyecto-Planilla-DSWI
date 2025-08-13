@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto Planilla DSWI", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto Planilla API", "Proyecto Planilla API\Proyecto Planilla API.csproj", "{8B99E111-E5E7-4FF4-A061-50C82F97BB4B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto Planilla Entidades", "Proyecto Planilla Entidades\Proyecto Planilla Entidades.csproj", "{9551025B-8EE1-4961-B008-1835220058C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proyecto Planilla Utils", "Proyecto Planilla Utils\Proyecto Planilla Utils.csproj", "{E88E243D-732E-452C-8F46-532480B2CFDD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{8B99E111-E5E7-4FF4-A061-50C82F97BB4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B99E111-E5E7-4FF4-A061-50C82F97BB4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B99E111-E5E7-4FF4-A061-50C82F97BB4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9551025B-8EE1-4961-B008-1835220058C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9551025B-8EE1-4961-B008-1835220058C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9551025B-8EE1-4961-B008-1835220058C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9551025B-8EE1-4961-B008-1835220058C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E88E243D-732E-452C-8F46-532480B2CFDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E88E243D-732E-452C-8F46-532480B2CFDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E88E243D-732E-452C-8F46-532480B2CFDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E88E243D-732E-452C-8F46-532480B2CFDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

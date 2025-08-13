@@ -15,4 +15,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4-beta1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Proyecto Planilla Entidades\Proyecto Planilla Entidades.csproj" />
+    <ProjectReference Include="..\Proyecto Planilla Utils\Proyecto Planilla Utils.csproj" />
+  </ItemGroup>
+
 </Project>

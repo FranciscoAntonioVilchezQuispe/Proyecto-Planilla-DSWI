@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using Proyecto_Planilla_DSWI.Utils.Response;
-using Proyecto_Planilla_DSWI.Utils;
+using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils;
+using Proyecto_Planilla_Utils.Response;
 using System.ComponentModel;
 using System.Linq;
 

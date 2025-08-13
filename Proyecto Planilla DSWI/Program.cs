@@ -1,9 +1,19 @@
 using OfficeOpenXml;
+using Proyecto_Planilla_DSWI.Interfaces;
+using Proyecto_Planilla_DSWI.Services;
+using Proyecto_Planilla_Entidades;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
+var apiBaseUrl = builder.Configuration["ApiService:URL"];
+
+#region Injeccion de Dependencias
+builder.Services.AddScoped<ICargoService, CargoService>();
+#endregion
 
 var app = builder.Build();
 // Configuración de la licencia EPPlus (debe ser lo primero)
