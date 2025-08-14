@@ -7,7 +7,12 @@ namespace Proyecto_Planilla_API.Data
 {
     public class AsistenciaTrabajadorLog
     {
-
+        public class GrabarAsistencias
+        {
+            public List<AsistenciasTrabajadores> Datos { get; set; }
+            public int Año { get; set; }
+            public int Mes { get; set; }
+        }
 
         public List<AsistenciaTrabajadorResponse> BuscarAsistenciaByPeriodo(int año, int mes)
         {
@@ -38,36 +43,37 @@ namespace Proyecto_Planilla_API.Data
             return ADOConnection.MapDataTableToList<AsistenciaTrabajadorResponse>(dataTable);
         }
 
-        public bool InsertarLista(List<AsistenciasTrabajadores> arr)
+        public bool InsertarLista(GrabarAsistencias asistencias)
         {
-            if (arr == null || arr.Count == 0)
+            if (asistencias.Datos == null || asistencias.Datos.Count == 0)
                 return false;
 
-         
-            foreach (var item in arr)
+            // Auditoría para cada registro
+            foreach (var asistencia in asistencias.Datos)
             {
-                new AuditoriaLog().SetAuditFieldsForInsert(item);
+                new AuditoriaLog().SetAuditFieldsForInsert(asistencia);
             }
 
-  
+            // Eliminar registros existentes del mismo mes y año
             string deleteSql = "DELETE FROM AsistenciasTrabajadores WHERE Año = @Año AND Mes = @Mes";
-            var deleteParameters = new MySqlParameter[]
+            var deleteParams = new MySqlParameter[]
             {
-                new MySqlParameter("@Año", arr[0].Año),
-                new MySqlParameter("@Mes", arr[0].Mes)
+        new MySqlParameter("@Año", asistencias.Año),
+        new MySqlParameter("@Mes", asistencias.Mes)
             };
+            ADOConnection.ExecuteNonQuery(deleteSql, deleteParams);
 
-            ADOConnection.ExecuteNonQuery(deleteSql, deleteParameters);
-
-  
-            string insertSql = $@"INSERT INTO AsistenciasTrabajadores
-                                 (IdTrabajador, Año, Mes, DiasLaborales, DiasDescanso,
-                                  DiasInasistencia, DiasFeriados, HorasExtra25, HorasExtra35,
-                                  FecCreacion, Activo)
-                                 VALUES
-                                 (@IdTrabajador, @Año, @Mes, @DiasLaborales, @DiasDescanso,
-                                  @DiasInasistencia, @DiasFeriados, @HorasExtra25, @HorasExtra35,
-                                  @FecCreacion, @Activo)";
+            // SQL para insertar registros
+            string insertSql = @"
+                                INSERT INTO AsistenciasTrabajadores (
+                                    IdTrabajador, Año, Mes, DiasLaborales, DiasDescanso,
+                                    DiasInasistencia, DiasFeriados, HorasExtra25, HorasExtra35,
+                                    FecCreacion, Activo
+                                ) VALUES (
+                                    @IdTrabajador, @Año, @Mes, @DiasLaborales, @DiasDescanso,
+                                    @DiasInasistencia, @DiasFeriados, @HorasExtra25, @HorasExtra35,
+                                    @FecCreacion, @Activo
+                                )";
 
             using (var connection = new MySqlConnection(ADOConnection.ConnectionString))
             {
@@ -76,24 +82,25 @@ namespace Proyecto_Planilla_API.Data
                 {
                     try
                     {
-                        foreach (var item in arr)
+                        foreach (var asistencia in asistencias.Datos)
                         {
                             using (var command = new MySqlCommand(insertSql, connection, transaction))
                             {
                                 command.Parameters.AddRange(new MySqlParameter[]
                                 {
-                                    new MySqlParameter("@IdTrabajador", item.IdTrabajador),
-                                    new MySqlParameter("@Año", item.Año),
-                                    new MySqlParameter("@Mes", item.Mes),
-                                    new MySqlParameter("@DiasLaborales", item.DiasLaborales),
-                                    new MySqlParameter("@DiasDescanso", item.DiasDescanso),
-                                    new MySqlParameter("@DiasInasistencia", item.DiasInasistencia),
-                                    new MySqlParameter("@DiasFeriados", item.DiasFeriados),
-                                    new MySqlParameter("@HorasExtra25", item.HorasExtra25),
-                                    new MySqlParameter("@HorasExtra35", item.HorasExtra35),
-                                    new MySqlParameter("@FecCreacion", item.FecCreacion),
-                                    new MySqlParameter("@Activo", item.Activo)
+                            new MySqlParameter("@IdTrabajador", asistencia.IdTrabajador),
+                            new MySqlParameter("@Año", asistencias.Año),
+                            new MySqlParameter("@Mes", asistencias.Mes),
+                            new MySqlParameter("@DiasLaborales", asistencia.DiasLaborales),
+                            new MySqlParameter("@DiasDescanso", asistencia.DiasDescanso),
+                            new MySqlParameter("@DiasInasistencia", asistencia.DiasInasistencia),
+                            new MySqlParameter("@DiasFeriados", asistencia.DiasFeriados),
+                            new MySqlParameter("@HorasExtra25", asistencia.HorasExtra25),
+                            new MySqlParameter("@HorasExtra35", asistencia.HorasExtra35),
+                            new MySqlParameter("@FecCreacion", asistencia.FecCreacion),
+                            new MySqlParameter("@Activo", asistencia.Activo)
                                 });
+
                                 command.ExecuteNonQuery();
                             }
                         }
@@ -101,13 +108,15 @@ namespace Proyecto_Planilla_API.Data
                         transaction.Commit();
                         return true;
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         transaction.Rollback();
-                        throw;
+                        // Puedes loguear el error si lo deseas
+                        throw new Exception("Error al insertar asistencias", ex);
                     }
                 }
             }
         }
+
     }
-} 
+}

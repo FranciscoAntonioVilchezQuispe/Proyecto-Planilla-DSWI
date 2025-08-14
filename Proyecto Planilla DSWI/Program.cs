@@ -13,6 +13,13 @@ var apiBaseUrl = builder.Configuration["ApiService:URL"];
 
 #region Injeccion de Dependencias
 builder.Services.AddScoped<ICargoService, CargoService>();
+builder.Services.AddScoped<IEstadoCivilService, EstadoCivilService>();
+builder.Services.AddScoped<IGeneroService, GeneroService>();
+builder.Services.AddScoped<ISistemaPensionService, SistemaPensionService>();
+builder.Services.AddScoped<ISituacionTrabajadorService, SituacionTrabajadorService>();
+builder.Services.AddScoped<ITipoDocumentoService,TipoDocumentoService>();
+builder.Services.AddScoped<IParametroService,ParametroService>();
+builder.Services.AddScoped<IAsistenciaService,AsistenciaService>();
 #endregion
 
 var app = builder.Build();

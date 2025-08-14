@@ -1,66 +1,68 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Proyecto_Planilla_DSWI.Data;
+using Proyecto_Planilla_DSWI.Interfaces;
 using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class ParametrosController : Controller
     {
-        private readonly ParametrosLog _parametrosLog;
+        private readonly IParametroService _parametroService;
 
-        public ParametrosController()
+        public ParametrosController(IParametroService parametroService)
         {
-            _parametrosLog = new ParametrosLog();
+            _parametroService = parametroService;
         }
 
-        public IActionResult Manage()
+        public async Task<IActionResult> Manage()
         {
-            var parametros = _parametrosLog.BusquedaOne();
+            var result = await _parametroService.BusquedaOneAsync();
 
-            if (parametros == null)
+            if (result.Status == 200)
             {
-                // Si no existe registro, creamos uno nuevo
-                parametros = new Parametros();
+                return View(result.Data ?? new Parametros());
             }
-
-            return View(parametros);
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return View(new Parametros());
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Manage(Parametros parametros)
+        public async Task<IActionResult> Manage(Parametros parametros)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View(parametros);
-            }
-
-            try
-            {
-                int result;
+                IToReturn<int> result;
                 if (parametros.IdParametro == 0)
                 {
-                    // Insertar nuevo registro
-                    result = _parametrosLog.Insert(parametros);
-                    TempData["SuccessMessage"] = "Parámetros creados exitosamente";
+                    result = await _parametroService.InsertAsync(parametros);
+                    TempData["SuccessMessage"] = "Parámetros creados exitosamente.";
                 }
                 else
                 {
-                    // Actualizar registro existente
-                    result = _parametrosLog.Update(parametros);
-                    TempData["SuccessMessage"] = "Parámetros actualizados exitosamente";
+                    result = await _parametroService.UpdateAsync(parametros.IdParametro, parametros);
+                    TempData["SuccessMessage"] = "Parámetros actualizados exitosamente.";
                 }
 
-                if (result > 0)
+                if (result.Status == 200)
                 {
                     return RedirectToAction(nameof(Manage));
                 }
-
-                TempData["ErrorMessage"] = "No se pudieron guardar los parámetros";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                else
+                {
+                    if (result.Status == 412)
+                    {
+                        ModelState.AddModelError("", result.Message);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = result.Message;
+                    }
+                }
             }
 
             return View(parametros);
@@ -68,31 +70,24 @@ namespace Proyecto_Planilla_DSWI.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CambiarEstado()
+        public async Task<IActionResult> CambiarEstado()
         {
-            try
+            var parametro = await _parametroService.BusquedaOneAsync();
+            if (parametro.Status != 200 || parametro.Data == null)
             {
-                // Obtenemos el único registro
-                var parametro = _parametrosLog.BusquedaOne();
-                if (parametro == null)
-                {
-                    TempData["ErrorMessage"] = "No existe registro de parámetros para cambiar estado";
-                    return RedirectToAction(nameof(Manage));
-                }
-
-                var result = _parametrosLog.CambiarEstado(parametro.IdParametro);
-                if (result > 0)
-                {
-                    TempData["SuccessMessage"] = "Estado de los parámetros cambiado exitosamente";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "No se pudo cambiar el estado";
-                }
+                TempData["ErrorMessage"] = "No existe registro de parámetros para cambiar estado";
+                return RedirectToAction(nameof(Manage));
             }
-            catch (Exception ex)
+
+            var result = await _parametroService.CambiarEstadoAsync(parametro.Data.IdParametro);
+
+            if (result.Status == 200)
             {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                TempData["SuccessMessage"] = "Estado de los parámetros cambiado exitosamente.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
             }
 
             return RedirectToAction(nameof(Manage));

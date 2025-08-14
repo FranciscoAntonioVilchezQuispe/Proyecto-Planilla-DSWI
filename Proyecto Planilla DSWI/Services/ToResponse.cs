@@ -118,24 +118,78 @@ namespace Proyecto_Planilla_DSWI.Services
                             if (dataToken == null)
                                 throw new Exception("No se encontró campo data en la respuesta");
 
-                            string data = dataToken.ToString();
                             Type responseType = typeof(TResponse);
 
-                            switch (responseType)
+                            // Manejo especial para tipos primitivos cuando dataToken es un valor simple
+                            if (dataToken.Type == JTokenType.String ||
+                                dataToken.Type == JTokenType.Boolean ||
+                                dataToken.Type == JTokenType.Date ||
+                                dataToken.Type == JTokenType.Integer ||
+                                dataToken.Type == JTokenType.Float)
                             {
-                                case Type t when t == typeof(string):
-                                    return (TResponse)(object)data;
+                                string data = dataToken.ToString();
 
-                                case Type t when t == typeof(bool):
-                                    return (TResponse)(object)(bool.TryParse(data, out var b) && b);
+                                switch (responseType)
+                                {
+                                    case Type t when t == typeof(string):
+                                        return (TResponse)(object)data;
 
-                                case Type t when t == typeof(DateTime):
-                                    return (TResponse)(object)DateTime.Parse(data);
+                                    case Type t when t == typeof(bool):
+                                        return (TResponse)(object)(bool.TryParse(data, out var b) && b);
 
-                                default:
-                                    return JsonConvert.DeserializeObject<TResponse>(data, settings);
+                                    case Type t when t == typeof(DateTime):
+                                        return (TResponse)(object)DateTime.Parse(data);
+
+                                    default:
+                                        // Si es un tipo primitivo en dataToken pero TResponse no es primitivo,
+                                        // intentar deserializar normalmente
+                                        return JsonConvert.DeserializeObject<TResponse>(data, settings);
+                                }
                             }
+                            else
+                            {
+                                // Para objetos complejos, deserializar directamente desde el JToken
+                                if (responseType == typeof(object))
+                                {
+                                    // Para object o dynamic, convertir el JToken a objeto dinámico
+                                    return (TResponse)(object)dataToken.ToObject<dynamic>();
+                                }
+                                else if (responseType == typeof(string))
+                                {
+                                    // Si solicitan string pero es un objeto complejo, devolver el JSON
+                                    return (TResponse)(object)dataToken.ToString();
+                                }
+                                else
+                                {
+                                    // Deserializar directamente desde el JToken
+                                    return dataToken.ToObject<TResponse>(JsonSerializer.Create(settings));
+                                }
+                            }
+                        /*
+                        JToken dataToken = obj.Properties()
+                            .FirstOrDefault(p => p.Name.Equals("data", StringComparison.OrdinalIgnoreCase))?.Value;
 
+                        if (dataToken == null)
+                            throw new Exception("No se encontró campo data en la respuesta");
+
+                        string data = dataToken.ToString();
+                        Type responseType = typeof(TResponse);
+
+                        switch (responseType)
+                        {
+                            case Type t when t == typeof(string):
+                                return (TResponse)(object)data;
+
+                            case Type t when t == typeof(bool):
+                                return (TResponse)(object)(bool.TryParse(data, out var b) && b);
+
+                            case Type t when t == typeof(DateTime):
+                                return (TResponse)(object)DateTime.Parse(data);
+
+                            default:
+                                return JsonConvert.DeserializeObject<TResponse>(data, settings);
+                        }
+                        */
                         case 401:
                         case 412:
                         default:
