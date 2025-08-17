@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = $"Boleta de Pago - {ViewBag.NombreCompleto}";
+    Layout = "_LayoutBoleta"; 
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Boleta de Pago - @ViewBag.Mes/@ViewBag.Año</h2>
+        <button onclick="window.print()" class="btn btn-primary no-print">
+            <i class="bi bi-printer"></i> Imprimir
+        </button>
+    </div>
+
+    <div class="boleta-container">
+        @Html.Raw(ViewBag.BoletaHtml)
+    </div>
+</div>
+
+<style>
+    .boleta-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        background-color: white;
+    }
+
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background-color: white !important;
+        }
+
+        .boleta-container {
+            border: none;
+            padding: 0;
+        }
+    }
+</style>

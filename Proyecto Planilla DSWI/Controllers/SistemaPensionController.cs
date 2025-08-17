@@ -1,115 +1,135 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_DSWI.Interfaces;
+using Proyecto_Planilla_Entidades;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class SistemaPensionController : Controller
     {
-        private readonly SistemaPensionLog _sistemaPensionLog;
+        private readonly ISistemaPensionService _sistemaPensionService;
         private const int PageSize = 10;
 
-        public SistemaPensionController()
+        public SistemaPensionController(ISistemaPensionService sistemaPensionService)
         {
-            _sistemaPensionLog = new SistemaPensionLog();
+            _sistemaPensionService = sistemaPensionService;
         }
 
-        public IActionResult SistemaPension(int page = 1, _Estado estado = _Estado.Todos)
+        // GET: SistemaPension
+        public async Task<IActionResult> SistemaPension(int page = 1, _Estado estado = _Estado.Todos)
         {
-            var sistemas = _sistemaPensionLog.Busqueda(estado).ToList();
-            var totalItems = sistemas.Count;
+            var result = await _sistemaPensionService.BusquedaPaginadaAsync(page, PageSize, estado);
 
-            var paginatedItems = sistemas
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
-            ViewBag.PageSize = PageSize;
-            ViewBag.TotalItems = totalItems;
-            ViewBag.Estado = estado;
-
-            return View(paginatedItems);
-        }
-
-        public IActionResult Manage(int id = 0)
-        {
-            if (id == 0)
+            if (result.Status == 200)
             {
+                // Deserializar la respuesta paginada
+                var paginacion = result.Data;
+                ViewBag.CurrentPage = paginacion.currentPage;
+                ViewBag.TotalPages = paginacion.totalPages;
+                ViewBag.PageSize = paginacion.pageSize;
+                ViewBag.TotalItems = paginacion.totalItems;
+                ViewBag.Estado = estado;
+                return View(paginacion.data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return View(new List<SistemaPensiones>());
+            }
+        }
+
+        // GET: SistemaPension/Manage
+        public async Task<IActionResult> Manage(int? id)
+        {
+            if (id == null)
+            {
+                // Vista de creación
                 return View(new SistemaPensiones());
             }
 
-            var sistema = _sistemaPensionLog.Busqueda(_Estado.Todos)
-                .FirstOrDefault(s => s.IdSistemaPension == id);
-
-            if (sistema == null)
+            var result = await _sistemaPensionService.GetByIdAsync(id.Value);
+            if (result.Status == 200)
             {
-                TempData["ErrorMessage"] = "Sistema de pensión no encontrado";
+                return View(result.Data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
                 return RedirectToAction(nameof(SistemaPension));
             }
+        }
+
+        // POST: SistemaPension/Manage
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Manage(int? id, SistemaPensiones sistema)
+        {
+            if (ModelState.IsValid)
+            {
+                if (id == null)
+                {
+                    // Crear nuevo sistema de pensión
+                    var insertResult = await _sistemaPensionService.InsertAsync(sistema);
+
+                    if (insertResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Sistema de pensión creado exitosamente.";
+                        return RedirectToAction(nameof(SistemaPension));
+                    }
+                    else
+                    {
+                        if (insertResult.Status == 412) // Validation error
+                        {
+                            ModelState.AddModelError("", insertResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = insertResult.Message;
+                        }
+                    }
+                }
+                else
+                {
+                    // Actualizar sistema de pensión existente
+                    var updateResult = await _sistemaPensionService.UpdateAsync(id.Value, sistema);
+
+                    if (updateResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Sistema de pensión actualizado exitosamente.";
+                        return RedirectToAction(nameof(SistemaPension));
+                    }
+                    else
+                    {
+                        if (updateResult.Status == 412) // Validation error
+                        {
+                            ModelState.AddModelError("", updateResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = updateResult.Message;
+                        }
+                    }
+                }
+            }
 
             return View(sistema);
         }
 
+        // POST: SistemaPension/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Manage(SistemaPensiones sistema)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (!ModelState.IsValid)
+            var result = await _sistemaPensionService.CambiarEstadoAsync(id);
+
+            if (result.Status == 200)
             {
-                return View(sistema);
+                TempData["SuccessMessage"] = "Estado del sistema de pensión cambiado exitosamente.";
             }
-
-            try
+            else
             {
-                int result;
-                if (sistema.IdSistemaPension == 0)
-                {
-                    result = _sistemaPensionLog.Insert(sistema);
-                    TempData["SuccessMessage"] = "Sistema de pensión creado exitosamente";
-                }
-                else
-                {
-                    result = _sistemaPensionLog.Update(sistema);
-                    TempData["SuccessMessage"] = "Sistema de pensión actualizado exitosamente";
-                }
-
-                if (result > 0)
-                {
-                    return RedirectToAction(nameof(SistemaPension));
-                }
-
-                TempData["ErrorMessage"] = "No se pudo guardar el sistema de pensión";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
-            }
-
-            return View(sistema);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                var result = _sistemaPensionLog.CambiarEstado(id);
-                if (result > 0)
-                {
-                    TempData["SuccessMessage"] = "Estado del sistema de pensión cambiado exitosamente";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "No se pudo cambiar el estado";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                TempData["ErrorMessage"] = result.Message;
             }
 
             return RedirectToAction(nameof(SistemaPension));

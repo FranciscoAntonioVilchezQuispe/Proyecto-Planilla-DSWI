@@ -1,115 +1,127 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_DSWI.Interfaces;
+using Proyecto_Planilla_Entidades;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class GenerosController : Controller
     {
-        private readonly GenerosLog _generosLog;
+        private readonly IGeneroService _generoService;
         private const int PageSize = 10;
 
-        public GenerosController()
+        public GenerosController(IGeneroService generoService)
         {
-            _generosLog = new GenerosLog();
+            _generoService = generoService;
         }
 
-        public IActionResult Generos(int page = 1, _Estado estado = _Estado.Todos)
+        public async Task<IActionResult> Generos(int page = 1, _Estado estado = _Estado.Todos)
         {
-            var generos = _generosLog.Busqueda(estado).ToList();
-            var totalItems = generos.Count;
+            var result = await _generoService.BusquedaPaginadaAsync(page, PageSize, estado);
 
-            var paginatedItems = generos
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
-            ViewBag.PageSize = PageSize;
-            ViewBag.TotalItems = totalItems;
-            ViewBag.Estado = estado;
-
-            return View(paginatedItems);
+            if (result.Status == 200)
+            {
+                var paginacion = result.Data;
+                ViewBag.CurrentPage = paginacion.currentPage;
+                ViewBag.TotalPages = paginacion.totalPages;
+                ViewBag.PageSize = paginacion.pageSize;
+                ViewBag.TotalItems = paginacion.totalItems;
+                ViewBag.Estado = estado;
+                return View(paginacion.data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return View(new List<Generos>());
+            }
         }
 
-        public IActionResult Manage(int id = 0)
+        public async Task<IActionResult> Manage(int? id)
         {
-            if (id == 0)
+            if (id == null)
             {
                 return View(new Generos());
             }
 
-            var genero = _generosLog.Busqueda(_Estado.Todos)
-                .FirstOrDefault(g => g.IdGenero == id);
-
-            if (genero == null)
+            var result = await _generoService.GetByIdAsync(id.Value);
+            if (result.Status == 200)
             {
-                TempData["ErrorMessage"] = "Género no encontrado";
+                return View(result.Data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
                 return RedirectToAction(nameof(Generos));
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Manage(int? id, Generos genero)
+        {
+            if (ModelState.IsValid)
+            {
+                if (id == null)
+                {
+                    var insertResult = await _generoService.InsertAsync(genero);
+
+                    if (insertResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Género creado exitosamente.";
+                        return RedirectToAction(nameof(Generos));
+                    }
+                    else
+                    {
+                        if (insertResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", insertResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = insertResult.Message;
+                        }
+                    }
+                }
+                else
+                {
+                    var updateResult = await _generoService.UpdateAsync(id.Value, genero);
+
+                    if (updateResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Género actualizado exitosamente.";
+                        return RedirectToAction(nameof(Generos));
+                    }
+                    else
+                    {
+                        if (updateResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", updateResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = updateResult.Message;
+                        }
+                    }
+                }
+            }
 
             return View(genero);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Manage(Generos genero)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (!ModelState.IsValid)
+            var result = await _generoService.CambiarEstadoAsync(id);
+
+            if (result.Status == 200)
             {
-                return View(genero);
+                TempData["SuccessMessage"] = "Estado del género cambiado exitosamente.";
             }
-
-            try
+            else
             {
-                int result;
-                if (genero.IdGenero == 0)
-                {
-                    result = _generosLog.Insert(genero);
-                    TempData["SuccessMessage"] = "Género creado exitosamente";
-                }
-                else
-                {
-                    result = _generosLog.Update(genero);
-                    TempData["SuccessMessage"] = "Género actualizado exitosamente";
-                }
-
-                if (result > 0)
-                {
-                    return RedirectToAction(nameof(Generos));
-                }
-
-                TempData["ErrorMessage"] = "No se pudo guardar el género";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
-            }
-
-            return View(genero);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                var result = _generosLog.CambiarEstado(id);
-                if (result > 0)
-                {
-                    TempData["SuccessMessage"] = "Estado del género cambiado exitosamente";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "No se pudo cambiar el estado";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                TempData["ErrorMessage"] = result.Message;
             }
 
             return RedirectToAction(nameof(Generos));

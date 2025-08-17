@@ -29,9 +29,9 @@
                                 <li><a class="dropdown-item" asp-controller="Cargos" asp-action="Cargos">Cargos</a></li>
                                 <li><a class="dropdown-item" asp-controller="Generos" asp-action="Generos">Géneros</a></li>
                                 <li><a class="dropdown-item" asp-controller="EstadosCiviles" asp-action="EstadosCiviles">Estados Civiles</a></li>
-                                <li><a class="dropdown-item" asp-controller="SistemaPensiones" asp-action="SistemaPensiones">Sistema de Pensiones</a></li>
+                                <li><a class="dropdown-item" asp-controller="SistemaPension" asp-action="SistemaPension">Sistema de Pensiones</a></li>
                                 <li><a class="dropdown-item" asp-controller="SituacionTrabajador" asp-action="SituacionTrabajador">Situación de Trabajador</a></li>
-                                <li><a class="dropdown-item" asp-controller="TiposDocumentos" asp-action="TipoDocumento">Tipos de Documentos</a></li>
+                                <li><a class="dropdown-item" asp-controller="TipoDocumento" asp-action="TipoDocumento">Tipos de Documentos</a></li>
                                 <li><a class="dropdown-item" asp-controller="Parametros" asp-action="Manage">Parámetros</a></li>
                             </ul>
                         </li>
@@ -42,7 +42,7 @@
                                 Trabajadores
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="trabajadoresDropdown">
-                                <li><a class="dropdown-item" asp-controller="Trabajadores" asp-action="FichaDatos">Ficha Datos</a></li>
+                                <li><a class="dropdown-item" asp-controller="Trabajador" asp-action="Index">Ficha Datos</a></li>
                             </ul>
                         </li>
 
@@ -53,22 +53,12 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="planillaDropdown">
                                 <li><a class="dropdown-item" asp-controller="Asistencia" asp-action="CargaAsistencia">Asistencia Trabajador</a></li>
-                                <li><a class="dropdown-item" asp-controller="Planilla" asp-action="PlanillaMensual">Planilla Mensual</a></li>
+                                <li><a class="dropdown-item" asp-controller="PlanillaMensual" asp-action="Index">Planilla Mensual</a></li>
                             </ul>
                         </li>
 
-                        <!-- Reportes -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="reportesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Reportes
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="reportesDropdown">
-                                <li><a class="dropdown-item" asp-controller="Reportes" asp-action="Boleta">Reporte Boleta</a></li>
-                            </ul>
-                        </li>
                     </ul>
 
-                    <!-- Aquí puedes agregar el partial de login si es necesario -->
                    @*  <partial name="_LoginPartial" /> *@
                 </div>
             </div>

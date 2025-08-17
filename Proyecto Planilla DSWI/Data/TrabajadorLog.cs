@@ -1,8 +1,8 @@
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
-using Proyecto_Planilla_DSWI.Models;
-using Proyecto_Planilla_DSWI.Utils.Request;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils.Request;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Data
 {
@@ -17,8 +17,7 @@ namespace Proyecto_Planilla_DSWI.Data
                               VALUES (@IdTipoDocumento, @Documento, @Nombres, @ApellidoPaterno, @ApellidoMaterno, @IdGenero,
                                      @IdEstadoCivil, @Direccion, @Email, @Hijos, @IdCargo, @FecNacimiento,
                                      @FecIngreso, @IdSituacion, @IdSistemaPension, @Foto, @FecCreacion, @Activo);
-                              SELECT LAST_INSERT_ID();";  // Cambiado SCOPE_IDENTITY() por LAST_INSERT_ID()
-
+                              SELECT LAST_INSERT_ID();";  
             new AuditoriaLog().SetAuditFieldsForInsert(obj);
 
             var parameters = new MySqlParameter[]
@@ -117,36 +116,30 @@ namespace Proyecto_Planilla_DSWI.Data
 
         public IEnumerable<Trabajadores> Busqueda(BuquedaTrabajador obj)
         {
-            string cadena = $@"DECLARE @busqueda VARCHAR(50);
-                              SET @busqueda = @BusquedaParam;
-                              
-                              WITH Palabras AS (
-                                  SELECT value AS palabra
-                                  FROM STRING_SPLIT(@busqueda, ' ')
-                              )
-                              SELECT *
-                              FROM Trabajadores
-                              WHERE (
-                                  -- Si @busqueda está vacío, devolver todos los registros
-                                  @busqueda IS NULL OR @busqueda = ''
-                              )
-                              OR EXISTS (
-                                  -- Verificar que todas las palabras del término de búsqueda coincidan en algún campo
-                                  SELECT 1
-                                  FROM Palabras
-                                  WHERE 
-                                      (ApellidoPaterno LIKE '%' + palabra + '%'
-                                      OR ApellidoMaterno LIKE '%' + palabra + '%'
-                                      OR Nombres LIKE '%' + palabra + '%'
-                                      OR Documento LIKE '%' + palabra + '%')
-                              ) {(obj.Estado != _Estado.Todos ? $@" AND Activo = {(int)obj.Estado}" : "")}";
+            string cadena;
+            List<MySqlParameter> parameters = new List<MySqlParameter>();
 
-            var parameters = new MySqlParameter[]
+            if (string.IsNullOrWhiteSpace(obj.Busqueda))
             {
-                new MySqlParameter("@BusquedaParam", obj.Busqueda ?? "")
-            };
 
-            var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters);
+                cadena = @"SELECT * FROM Trabajadores 
+                  WHERE (@Estado = -1 OR Activo = @Estado)";
+            }
+            else
+            {
+                cadena = @"SELECT * FROM Trabajadores 
+                  WHERE (ApellidoPaterno LIKE CONCAT('%', @Busqueda, '%')
+                     OR ApellidoMaterno LIKE CONCAT('%', @Busqueda, '%')
+                     OR Nombres LIKE CONCAT('%', @Busqueda, '%')
+                     OR Documento LIKE CONCAT('%', @Busqueda, '%')
+                     AND (@Estado = -1 OR Activo = @Estado)";
+
+                parameters.Add(new MySqlParameter("@Busqueda", obj.Busqueda));
+            }
+
+            parameters.Add(new MySqlParameter("@Estado", obj.Estado != _Estado.Todos ? (int)obj.Estado : -1));
+
+            var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters.ToArray());
             return ADOConnection.MapDataTableToList<Trabajadores>(dataTable);
         }
     }
