@@ -1,8 +1,14 @@
 ﻿@model Proyecto_Planilla_Entidades.Trabajadores
+
 @{
-    ViewData["Title"] = "RegistroTrabajador";
+    ViewData["Title"] = "RegistroEmpleado";
 }
-<h1>@ViewBag.h1</h1>
+
+<h2>@ViewBag.h1</h2>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
 
 <hr />
 
@@ -21,7 +27,7 @@
                         </div>
                         <div class="col-3 text-start">
                             <select asp-for="IdTipoDocumento" asp-items="ViewBag.tipoDocumento"
-                                    class="form-select"></select>
+                                class="form-select"></select>
                             <span asp-validation-for="IdTipoDocumento" class="text-danger"></span>
                         </div>
                         <div class="col-2 text-end">
@@ -175,30 +181,87 @@
                 </div>
             </div>
             <div class="col-3">
-                <label asp-for="Foto" class="control-label"></label>
-                <input asp-for="Foto" class="form-control" />
-                <span asp-validation-for="Foto" class="text-danger"></span>
 
-                <div class="footer">
-                    <input type="button" />
+@*                 <div class="form-group">
+                    <button type="button" class="btn btn-primary" id="btnIngreso">
+                        Ingresos
+                    </button>
+                </div> *@
+                <br />
+                <br>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal">Grabar</button>
                 </div>
             </div>
         </div>
 
-        <div class="form-group">
-            <input type="submit" value="Create" class="btn btn-primary" />
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">@ViewBag.h1</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Seguro que quieres grabar este registro?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+                        <input type="submit" value="Confirmar" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <div class="modal fade" id="modalIngreso" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <!-- modal-lg para más ancho -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel">Ingreso</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                        <!-- Aquí se cargará la vista parcial -->
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </form>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var idTrabajador = parseInt(document.getElementById("IdTrabajador").value || "0");
+
+            if (idTrabajador === 0) {
+                document.getElementById("btnIngreso").style.display = "none";
+            } else {
+                document.getElementById("btnIngreso").style.display = "block";
+            }
+        });
+    </script>
+
+    <script>
+        document.getElementById("btnIngreso").addEventListener("click", function () {
+                var id = document.getElementById("IdTrabajador").value;
+
+                    fetch(`/Trabajador/IngresoMensual?id=${id}`)
+                            .then(response => response.text())
+                            .then(html => {
+                                document.getElementById("modalBody").innerHTML = html;
+                                var modal = new bootstrap.Modal(document.getElementById('modalIngreso'));
+                                modal.show();
+                            });
+                    });
+
+    </script>
+
 }
