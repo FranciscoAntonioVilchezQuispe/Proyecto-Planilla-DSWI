@@ -8,7 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.7.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+    <PackageReference Include="MySql.Data" Version="9.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Proyecto Planilla Entidades\Proyecto Planilla Entidades.csproj" />
+    <ProjectReference Include="..\Proyecto Planilla Utils\Proyecto Planilla Utils.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using OfficeOpenXml;
 using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using Proyecto_Planilla_DSWI.Utils;
-using Proyecto_Planilla_DSWI.Utils.Request;
+using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils;
+using Proyecto_Planilla_Utils.Request;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {

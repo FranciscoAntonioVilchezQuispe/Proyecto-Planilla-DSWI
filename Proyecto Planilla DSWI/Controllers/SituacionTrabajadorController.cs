@@ -1,115 +1,133 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_DSWI.Interfaces;
+using Proyecto_Planilla_Entidades;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class SituacionTrabajadorController : Controller
     {
-        private readonly SituacionLog _situacionLog;
+        private readonly ISituacionTrabajadorService _situacionTrabajadorService;
         private const int PageSize = 10;
 
-        public SituacionTrabajadorController()
+        public SituacionTrabajadorController(ISituacionTrabajadorService situacionTrabajadorService)
         {
-            _situacionLog = new SituacionLog();
+            _situacionTrabajadorService = situacionTrabajadorService;
         }
 
-        public IActionResult SituacionTrabajador(int page = 1, _Estado estado = _Estado.Todos)
+        // GET: SituacionTrabajador
+        public async Task<IActionResult> SituacionTrabajador(int page = 1, _Estado estado = _Estado.Todos)
         {
-            var situaciones = _situacionLog.Busqueda(estado).ToList();
-            var totalItems = situaciones.Count;
+            var result = await _situacionTrabajadorService.BusquedaPaginadaAsync(page, PageSize, estado);
 
-            var paginatedItems = situaciones
-                .Skip((page - 1) * PageSize)
-                .Take(PageSize)
-                .ToList();
-
-            ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
-            ViewBag.PageSize = PageSize;
-            ViewBag.TotalItems = totalItems;
-            ViewBag.Estado = estado;
-
-            return View(paginatedItems);
+            if (result.Status == 200)
+            {
+                var paginacion = result.Data;
+                ViewBag.CurrentPage = paginacion.currentPage;
+                ViewBag.TotalPages = paginacion.totalPages;
+                ViewBag.PageSize = paginacion.pageSize;
+                ViewBag.TotalItems = paginacion.totalItems;
+                ViewBag.Estado = estado;
+                return View(paginacion.data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return View(new List<SituacionTrabajador>());
+            }
         }
 
-        public IActionResult Manage(int id = 0)
+        // GET: SituacionTrabajador/Manage
+        public async Task<IActionResult> Manage(int? id)
         {
-            if (id == 0)
+            if (id == null)
             {
                 return View(new SituacionTrabajador());
             }
 
-            var situacion = _situacionLog.Busqueda(_Estado.Todos)
-                .FirstOrDefault(s => s.IdSituacion == id);
-
-            if (situacion == null)
+            var result = await _situacionTrabajadorService.GetByIdAsync(id.Value);
+            if (result.Status == 200)
             {
-                TempData["ErrorMessage"] = "Situación de trabajador no encontrada";
+                return View(result.Data);
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
                 return RedirectToAction(nameof(SituacionTrabajador));
             }
+        }
+
+        // POST: SituacionTrabajador/Manage
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Manage(int? id, SituacionTrabajador situacion)
+        {
+            if (ModelState.IsValid)
+            {
+                if (id == null)
+                {
+                    // Crear nueva situación de trabajador
+                    var insertResult = await _situacionTrabajadorService.InsertAsync(situacion);
+
+                    if (insertResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Situación de trabajador creada exitosamente.";
+                        return RedirectToAction(nameof(SituacionTrabajador));
+                    }
+                    else
+                    {
+                        if (insertResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", insertResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = insertResult.Message;
+                        }
+                    }
+                }
+                else
+                {
+                    // Actualizar situación de trabajador existente
+                    var updateResult = await _situacionTrabajadorService.UpdateAsync(id.Value, situacion);
+
+                    if (updateResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "Situación de trabajador actualizada exitosamente.";
+                        return RedirectToAction(nameof(SituacionTrabajador));
+                    }
+                    else
+                    {
+                        if (updateResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", updateResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = updateResult.Message;
+                        }
+                    }
+                }
+            }
 
             return View(situacion);
         }
 
+        // POST: SituacionTrabajador/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Manage(SituacionTrabajador situacion)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (!ModelState.IsValid)
+            var result = await _situacionTrabajadorService.CambiarEstadoAsync(id);
+
+            if (result.Status == 200)
             {
-                return View(situacion);
+                TempData["SuccessMessage"] = "Estado de la situación de trabajador cambiado exitosamente.";
             }
-
-            try
+            else
             {
-                int result;
-                if (situacion.IdSituacion == 0)
-                {
-                    result = _situacionLog.Insert(situacion);
-                    TempData["SuccessMessage"] = "Situación de trabajador creada exitosamente";
-                }
-                else
-                {
-                    result = _situacionLog.Update(situacion);
-                    TempData["SuccessMessage"] = "Situación de trabajador actualizada exitosamente";
-                }
-
-                if (result > 0)
-                {
-                    return RedirectToAction(nameof(SituacionTrabajador));
-                }
-
-                TempData["ErrorMessage"] = "No se pudo guardar la situación de trabajador";
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
-            }
-
-            return View(situacion);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                var result = _situacionLog.CambiarEstado(id);
-                if (result > 0)
-                {
-                    TempData["SuccessMessage"] = "Estado de la situación de trabajador cambiado exitosamente";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "No se pudo cambiar el estado";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = $"Error: {ex.Message}";
+                TempData["ErrorMessage"] = result.Message;
             }
 
             return RedirectToAction(nameof(SituacionTrabajador));

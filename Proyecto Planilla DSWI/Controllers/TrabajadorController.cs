@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Proyecto_Planilla_DSWI.Data;
-using Proyecto_Planilla_DSWI.Models;
-using Proyecto_Planilla_DSWI.Utils;
-using Proyecto_Planilla_DSWI.Utils.Request;
+using Newtonsoft.Json;
+using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils;
+using Proyecto_Planilla_Utils.Request;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+
+
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {

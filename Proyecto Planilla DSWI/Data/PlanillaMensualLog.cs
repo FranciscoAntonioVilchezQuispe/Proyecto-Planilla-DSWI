@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using OfficeOpenXml;
-using Proyecto_Planilla_DSWI.Models;
-using Proyecto_Planilla_DSWI.Utils.Request;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_Entidades;
+using Proyecto_Planilla_Utils.Request;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Data
 {
@@ -78,7 +78,7 @@ namespace Proyecto_Planilla_DSWI.Data
                 obj.Prima = Math.Round((decimal)obj.TotalIngreso * ((decimal)obj.PorcPrima / 100), 2, MidpointRounding.AwayFromZero);
                 obj.TotalDescuento = Math.Round((decimal)obj.Aporte + (decimal)obj.Comision + (decimal)obj.Prima, 2, MidpointRounding.AwayFromZero);
                 obj.TotalNetoBoleta = Math.Round((decimal)obj.TotalIngreso - (decimal)obj.TotalDescuento, 2, MidpointRounding.AwayFromZero);
-                obj.TotalNetoBoletaCad = Utils.NumberToLetters.ToCardinal((decimal)obj.TotalNetoBoleta) + " SOLES";
+                obj.TotalNetoBoletaCad = Proyecto_Planilla_Utils.NumberToLetters.ToCardinal((decimal)obj.TotalNetoBoleta) + " SOLES";
                 arr.Add(obj);
             }
             return arr;

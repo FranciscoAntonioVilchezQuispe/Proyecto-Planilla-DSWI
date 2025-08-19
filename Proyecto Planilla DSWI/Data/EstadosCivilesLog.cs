@@ -1,7 +1,7 @@
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
-using Proyecto_Planilla_DSWI.Models;
-using static Proyecto_Planilla_DSWI.Utils.GlobalEnum;
+using Proyecto_Planilla_Entidades;
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Data
 {
