@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using MySqlX.XDevAPI;
 using Newtonsoft.Json;
+using Proyecto_Planilla_DSWI.Interfaces;
 using Proyecto_Planilla_Entidades;
 using Proyecto_Planilla_Utils;
 using Proyecto_Planilla_Utils.Request;
+using System.Drawing.Printing;
+using System.Text;
 using static Org.BouncyCastle.Math.EC.ECCurve;
-
-
+using static Proyecto_Planilla_Utils.GlobalEnum;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
     public class TrabajadorController : Controller
     {
         private readonly IConfiguration _config;
-
-        private readonly TrabajadorLog _trabajadorLog;
-        private readonly CargoLog _cargoLog;
-        private readonly SituacionLog _situacionLog;
-        private readonly TipoDocumentoLog _tipoDocumentoLog;
-        private readonly GenerosLog _generosLog;
-        private readonly EstadosCivilesLog _estadosCivilesLog;
-        private readonly SistemaPensionLog _sistemaPensionLog;
-        private readonly IngresosTrabajadoresLog _ingresoLog;
+        private readonly ITrabajadorService _trabajadorService;
+        private readonly ICargoService _cargoService;
+        private readonly ISituacionTrabajadorService _situacionTrabajadorService;
+        private readonly ITipoDocumentoService _tipoDocumentoService;
+        private readonly IGeneroService _generoService;
+        private readonly IEstadoCivilService _estadoCivilService;
+        private readonly ISistemaPensionService _sistemaPensionService;
 
         List<Cargos> ArrCargos = new List<Cargos>();
         List<SituacionTrabajador> ArrSituacion = new List<SituacionTrabajador>();
@@ -30,26 +31,67 @@ namespace Proyecto_Planilla_DSWI.Controllers
         List<EstadosCiviles> ArrEstadocivil = new List<EstadosCiviles>();
         List<SistemaPensiones> ArrSistemaPensiones = new List<SistemaPensiones>();
         
-        public TrabajadorController()
+        public TrabajadorController(IConfiguration config, ITrabajadorService trabajadorService, ICargoService cargoService,
+            ISituacionTrabajadorService situacionTrabajadorService,
+            ITipoDocumentoService tipoDocumentoService,
+            IGeneroService generoService,
+            IEstadoCivilService estadoCivilService,
+            ISistemaPensionService sistemaPensionService)
         {
-            _trabajadorLog = new TrabajadorLog();
-            _cargoLog = new CargoLog();
-            _situacionLog = new SituacionLog();
-            _tipoDocumentoLog = new TipoDocumentoLog();
-            _generosLog = new GenerosLog();
-            _estadosCivilesLog = new EstadosCivilesLog();
-            _sistemaPensionLog = new SistemaPensionLog();
-            _ingresoLog = new IngresosTrabajadoresLog();
+            _config = config;
+            _trabajadorService = trabajadorService;
+            _cargoService = cargoService;
+            _situacionTrabajadorService = situacionTrabajadorService;
+            _tipoDocumentoService = tipoDocumentoService;
+            _generoService = generoService;
+            _estadoCivilService = estadoCivilService;
+            _sistemaPensionService = sistemaPensionService;
         }
 
         public async Task CargarParametros()
         {
-            ArrCargos = (List<Cargos>)_cargoLog.Busqueda(GlobalEnum._Estado.Activo);
-            ArrSituacion = (List<SituacionTrabajador>)_situacionLog.Busqueda(GlobalEnum._Estado.Activo);
-            ArrTpoDocumento = (List<TipoDocumentos>)_tipoDocumentoLog.Busqueda(GlobalEnum._Estado.Activo);
-            ArrGenero = (List<Generos>)_generosLog.Busqueda(GlobalEnum._Estado.Activo);
-            ArrEstadocivil = (List<EstadosCiviles>)_estadosCivilesLog.Busqueda(GlobalEnum._Estado.Activo);
-            ArrSistemaPensiones = (List<SistemaPensiones>)_sistemaPensionLog.Busqueda(GlobalEnum._Estado.Activo);
+            ArrCargos = await GetCargo();
+            ArrSituacion = await GetSituacion();
+            ArrTpoDocumento = await GetTipoDocumentos();
+            ArrGenero = await GetGenero();
+            ArrEstadocivil = await GetEstadoCivil();
+            ArrSistemaPensiones = await GetSistPensiones();
+        }
+
+        public async Task<List<Cargos>> GetCargo()
+        {
+            var result = await _cargoService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<Cargos>();
+        }
+
+        private async Task<List<SituacionTrabajador>> GetSituacion()
+        {
+            var result = await _situacionTrabajadorService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<SituacionTrabajador>();
+        }
+
+        private async Task<List<TipoDocumentos>> GetTipoDocumentos()
+        {
+            var result = await _tipoDocumentoService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<TipoDocumentos>();
+        }
+
+        private async Task<List<Generos>> GetGenero()
+        {
+            var result = await _generoService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<Generos>();
+        }
+
+        private async Task<List<EstadosCiviles>> GetEstadoCivil()
+        {
+            var result = await _estadoCivilService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<EstadosCiviles>();
+        }
+
+        private async Task<List<SistemaPensiones>> GetSistPensiones()
+        {
+            var result = await _sistemaPensionService.BusquedaAsync(_Estado.Activo);
+            return result.Status == 200 ? result.Data.ToList() : new List<SistemaPensiones>();
         }
 
         public async Task<IActionResult> NuevoRegistro()
@@ -75,7 +117,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
 
         }
 
-        public async Task<IActionResult> EditarRegistro(string busqueda)
+        public async Task<IActionResult> EditarRegistro(int id)
         {
             try
             {
@@ -88,9 +130,9 @@ namespace Proyecto_Planilla_DSWI.Controllers
                 ViewBag.cargo = new SelectList(ArrCargos, "IdCargo", "Nombre");
                 ViewBag.sistPension = new SelectList(ArrSistemaPensiones, "IdSistemaPension", "Nombre");
 
-                var Obj = await GetTrabajadores(busqueda);
+                var result = await _trabajadorService.GetByIdAsync(id);
 
-                return View("RegistroTrabajador", Obj.FirstOrDefault());
+                return View("RegistroTrabajador", result.Data);
             }
             catch (Exception ex)
             {
@@ -99,98 +141,120 @@ namespace Proyecto_Planilla_DSWI.Controllers
             }
         }
 
-        public async Task<IActionResult> Index(string busqueda, int page = 1)
+        public async Task<IActionResult> Index(string busqueda = "", int page = 1)
         {
             List<Trabajadores> Lista = new List<Trabajadores>();
 
             try
             {
-                Lista = await GetTrabajadores(busqueda);
+                var listado = new List<Trabajadores>();
+                var objBusqueda = new BuquedaTrabajador { Busqueda = busqueda, Estado = GlobalEnum._Estado.Todos };
+
+                var result = await _trabajadorService.BusquedaAsync(busqueda, GlobalEnum._Estado.Todos);
+                Lista = result.Data.ToList();
 
                 int totalRegistros = Lista.Count;
-                int regisroPorPagina = 5;
+                int regisroPorPagina = 10;
 
                 int totalPaginas = (int)Math.Ceiling((double)totalRegistros / regisroPorPagina);
                 int omitir = (page - 1) * regisroPorPagina;
                 ViewBag.totalPaginas = totalPaginas;
 
-                return View(Lista.Skip(omitir).Take(regisroPorPagina));
+                return View("index", result.Data.Skip(omitir).Take(regisroPorPagina));
+
             }
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
                 return RedirectToAction(nameof(Index));
-            }
-        }
-
-        public async Task<List<Trabajadores>> GetTrabajadores(string busqueda)
-        {
-            List<Trabajadores> Lista = new List<Trabajadores>();
-            var objBusqueda = new BuquedaTrabajador { Busqueda = busqueda, Estado = GlobalEnum._Estado.Todos };
-            try
-            {
-                Lista = _trabajadorLog.Busqueda(objBusqueda).ToList();
-
-                return Lista;
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-                throw;
             }
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistroTrabajador(Trabajadores objTrabajador)
         {
-            int intResult = 0;            
-            try
+            if (ModelState.IsValid)
             {
                 if (objTrabajador.IdTrabajador == 0)
-                    intResult = _trabajadorLog.Insert(objTrabajador);
+                {
+                    var insertResult = await _trabajadorService.InsertAsync(objTrabajador);
 
+                    if (insertResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "El trabajador creada exitosamente.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        if (insertResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", insertResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = insertResult.Message;
+                        }
+                    }
+                }
                 else
-                    intResult = _trabajadorLog.Update(objTrabajador);
+                {                    
+                    var updateResult = await _trabajadorService.UpdateAsync(objTrabajador.IdTrabajador, objTrabajador);
 
-
-                if (intResult == 0)
-                    throw new Exception("No se realizó el registro.");
-                else
-                    return RedirectToAction(nameof(Index));
-
+                    if (updateResult.Status == 200)
+                    {
+                        TempData["SuccessMessage"] = "El trabajador actualizada exitosamente.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        if (updateResult.Status == 412)
+                        {
+                            ModelState.AddModelError("", updateResult.Message);
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = updateResult.Message;
+                        }
+                    }
+                }
             }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
+
+            return View("RegistroTrabajador", objTrabajador);
         }
 
-        public IActionResult IngresoMensual(int id)
+        public async Task<IActionResult> EliminarRegistro(int id)
         {
-            var obj = _ingresoLog.BusquedaOne(id);
-
-            if(obj == null)
-                return PartialView();
-            else
-                return PartialView(obj);
+            var obj = _trabajadorService.CambiarEstadoAsync(id);
+            return RedirectToAction("index");
         }
 
-        public IActionResult RegistroMensual(IngresosTrabajadores objIngreso)
-        {
-            int intResult = 0;
-            if (objIngreso.IdIngresoTrabajador == 0)
-                intResult = _ingresoLog.Insert(objIngreso);
+        //public IActionResult IngresoMensual(int id)
+        //{
+        //    var obj = _ingresoLog.BusquedaOne(id);
 
-            else
-                intResult = _ingresoLog.Update(objIngreso);
+        //    if(obj == null)
+        //        return PartialView();
+        //    else
+        //        return PartialView(obj);
+        //}
 
-            if (intResult == 0)
-                throw new Exception("No se realizó el registro.");
-            else
-                objIngreso.IdIngresoTrabajador = intResult;
+        //public IActionResult RegistroMensual(IngresosTrabajadores objIngreso)
+        //{
+        //    int intResult = 0;
+        //    if (objIngreso.IdIngresoTrabajador == 0)
+        //        intResult = _ingresoLog.Insert(objIngreso);
 
-            return PartialView(objIngreso);
-        }
+        //    else
+        //        intResult = _ingresoLog.Update(objIngreso);
+
+        //    if (intResult == 0)
+        //        throw new Exception("No se realizó el registro.");
+        //    else
+        //        objIngreso.IdIngresoTrabajador = intResult;
+
+        //    return PartialView(objIngreso);
+        //}
+
     }
 }

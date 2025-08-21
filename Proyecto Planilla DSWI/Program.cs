@@ -20,6 +20,7 @@ builder.Services.AddScoped<ISituacionTrabajadorService, SituacionTrabajadorServi
 builder.Services.AddScoped<ITipoDocumentoService,TipoDocumentoService>();
 builder.Services.AddScoped<IParametroService,ParametroService>();
 builder.Services.AddScoped<IAsistenciaService,AsistenciaService>();
+builder.Services.AddScoped<ITrabajadorService, TrabajadorService>();
 #endregion
 
 var app = builder.Build();
