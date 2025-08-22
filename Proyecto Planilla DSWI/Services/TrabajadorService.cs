@@ -91,7 +91,7 @@ namespace Proyecto_Planilla_DSWI.Services
             }
         }
 
-        public async Task<IToReturn<int>> InsertAsync(Trabajadores trabajadores)
+        public async Task<IToReturn<int>>InsertAsync(Trabajadores trabajadores)
         {
             try
             {

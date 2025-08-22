@@ -10,6 +10,7 @@ using System.Drawing.Printing;
 using System.Text;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using static Proyecto_Planilla_Utils.GlobalEnum;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Proyecto_Planilla_DSWI.Controllers
 {
@@ -174,11 +175,14 @@ namespace Proyecto_Planilla_DSWI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistroTrabajador(Trabajadores objTrabajador)
         {
+            Trabajadores newObjTrabajador = new Trabajadores();
+            newObjTrabajador = objTrabajador;
+            newObjTrabajador.Foto = BitConverter.GetBytes(34343);
             //if (ModelState.IsValid)
             //{
-                if (objTrabajador.IdTrabajador == 0)
+            if (objTrabajador.IdTrabajador == 0)
                 {
-                    var insertResult = await _trabajadorService.InsertAsync(objTrabajador);
+                    var insertResult = await _trabajadorService.InsertAsync(newObjTrabajador);
 
                     if (insertResult.Status == 200)
                     {
@@ -199,7 +203,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
                 }
                 else
                 {                    
-                    var updateResult = await _trabajadorService.UpdateAsync(objTrabajador.IdTrabajador, objTrabajador);
+                    var updateResult = await _trabajadorService.UpdateAsync(objTrabajador.IdTrabajador, newObjTrabajador);
 
                     if (updateResult.Status == 200)
                     {
