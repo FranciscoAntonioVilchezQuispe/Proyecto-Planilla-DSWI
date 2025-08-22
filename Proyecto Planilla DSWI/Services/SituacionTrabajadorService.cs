@@ -100,8 +100,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<SituacionTrabajador>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/SituacionTrabajadorApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/SituacionTrabajadorApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<SituacionTrabajador>(result ?? new List<SituacionTrabajador>());

@@ -100,8 +100,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<EstadosCiviles>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/EstadosCivilesApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/EstadosCivilesApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<EstadosCiviles>(result ?? new List<EstadosCiviles>());

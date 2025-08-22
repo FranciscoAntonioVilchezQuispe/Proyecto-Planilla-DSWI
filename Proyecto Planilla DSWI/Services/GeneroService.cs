@@ -100,8 +100,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<Generos>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/GenerosApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/GenerosApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<Generos>(result ?? new List<Generos>());
