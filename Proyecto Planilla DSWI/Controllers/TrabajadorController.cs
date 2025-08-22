@@ -174,8 +174,8 @@ namespace Proyecto_Planilla_DSWI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegistroTrabajador(Trabajadores objTrabajador)
         {
-            if (ModelState.IsValid)
-            {
+            //if (ModelState.IsValid)
+            //{
                 if (objTrabajador.IdTrabajador == 0)
                 {
                     var insertResult = await _trabajadorService.InsertAsync(objTrabajador);
@@ -218,7 +218,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
                         }
                     }
                 }
-            }
+            //}
 
             return View("RegistroTrabajador", objTrabajador);
         }
