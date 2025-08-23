@@ -11,17 +11,17 @@ namespace Proyecto_Planilla_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TrabajadorApiController : ControllerBase
+    public class IngresosTrabajadoresApiController : ControllerBase
     {
-        private readonly TrabajadorLog _trabajadorLog;
+        private readonly IngresosTrabajadoresLog _ingresosTrabajadoresLog;
 
-        public TrabajadorApiController()
+        public IngresosTrabajadoresApiController()
         {
-            _trabajadorLog = new TrabajadorLog();
+            _ingresosTrabajadoresLog = new IngresosTrabajadoresLog();
         }
 
         [HttpPost("Insert")]
-        public IActionResult Insert(Trabajadores obj)
+        public IActionResult Insert(IngresosTrabajadores obj)
         {
             try
             {
@@ -33,7 +33,7 @@ namespace Proyecto_Planilla_API.Controllers
                     return StatusCode(validationError.Status, validationError);
                 }
 
-                var res = _trabajadorLog.Insert(obj);
+                var res = _ingresosTrabajadoresLog.Insert(obj);
                 var respuesta = new ToReturn<int>(res);
                 return StatusCode(respuesta.Status, respuesta);
             }
@@ -45,7 +45,7 @@ namespace Proyecto_Planilla_API.Controllers
         }
 
         [HttpPut("Update/{id}")]
-        public IActionResult Update(int id, Trabajadores obj)
+        public IActionResult Update(int id, IngresosTrabajadores obj)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace Proyecto_Planilla_API.Controllers
                 }
 
                 obj.IdTrabajador = id;
-                var res = _trabajadorLog.Update(obj);
+                var res = _ingresosTrabajadoresLog.Update(obj);
 
                 if (res > 0)
                 {
@@ -67,7 +67,7 @@ namespace Proyecto_Planilla_API.Controllers
                 }
                 else
                 {
-                    var noEncontrado = new ToReturnNoEncontrado<int>($"No se pudo actualizar el registro del trabajador: {obj.Nombres}");
+                    var noEncontrado = new ToReturnNoEncontrado<int>($"No se pudo actualizar el registro del ingreso trabajador");
                     return StatusCode(noEncontrado.Status, noEncontrado);
                 }
 
@@ -84,7 +84,7 @@ namespace Proyecto_Planilla_API.Controllers
         {
             try
             {
-                var res = _trabajadorLog.CambiarEstado(id);
+                var res = _ingresosTrabajadoresLog.CambiarEstado(id);
 
                 if (res > 0)
                 {
@@ -105,13 +105,13 @@ namespace Proyecto_Planilla_API.Controllers
             }
         }
 
-        [HttpPost("Busqueda")]
-        public IActionResult Busqueda(BuquedaTrabajador obj)
+        [HttpGet("Busqueda")]
+        public IActionResult Busqueda(_Estado estado = _Estado.Todos)
         {
             try
             {
-                var listaTrabajador = _trabajadorLog.Busqueda(obj).ToList();
-                var respuesta = new ToReturnList<Trabajadores>(listaTrabajador);
+                var listaIngresoTrabajador = _ingresosTrabajadoresLog.Busqueda(estado).ToList();
+                var respuesta = new ToReturnList<IngresosTrabajadores>(listaIngresoTrabajador);
                 return StatusCode(respuesta.Status, respuesta);
             }
             catch (Exception ex)
@@ -122,26 +122,26 @@ namespace Proyecto_Planilla_API.Controllers
         }
 
         [HttpGet("GetById/{id}")]
-        public IActionResult GetById(int Id)
+        public IActionResult BusquedaOne(int Id)
         {
             try
             {
-                var trabajador = _trabajadorLog.BusquedaId(Id);
+                var ingresoTrabajador = _ingresosTrabajadoresLog.BusquedaOne(Id);
 
-                if (trabajador != null)
+                if (ingresoTrabajador != null)
                 {
-                    var respuesta = new ToReturn<Trabajadores>(trabajador);
+                    var respuesta = new ToReturn<IngresosTrabajadores>(ingresoTrabajador);
                     return StatusCode(respuesta.Status, respuesta);
                 }
                 else
                 {
-                    var noEncontrado = new ToReturnNoEncontrado<Trabajadores>("trabajador no encontrada");
+                    var noEncontrado = new ToReturnNoEncontrado<IngresosTrabajadores>("Ingresos trabajador no encontrada");
                     return StatusCode(noEncontrado.Status, noEncontrado);
                 }
             }
             catch (Exception ex)
             {
-                var error = new ToReturnError<Trabajadores>($"{ex.Message} {ex.InnerException}");
+                var error = new ToReturnError<IngresosTrabajadores>($"{ex.Message} {ex.InnerException}");
                 return StatusCode(error.Status, error);
             }
         }

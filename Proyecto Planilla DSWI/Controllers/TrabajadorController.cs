@@ -24,6 +24,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
         private readonly IGeneroService _generoService;
         private readonly IEstadoCivilService _estadoCivilService;
         private readonly ISistemaPensionService _sistemaPensionService;
+        private readonly IIngresosTrabajadoresService _ingresosTrabajadoresService;
 
         List<Cargos> ArrCargos = new List<Cargos>();
         List<SituacionTrabajador> ArrSituacion = new List<SituacionTrabajador>();
@@ -37,7 +38,8 @@ namespace Proyecto_Planilla_DSWI.Controllers
             ITipoDocumentoService tipoDocumentoService,
             IGeneroService generoService,
             IEstadoCivilService estadoCivilService,
-            ISistemaPensionService sistemaPensionService)
+            ISistemaPensionService sistemaPensionService,
+            IIngresosTrabajadoresService ingresosTrabajadoresService)
         {
             _config = config;
             _trabajadorService = trabajadorService;
@@ -47,6 +49,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
             _generoService = generoService;
             _estadoCivilService = estadoCivilService;
             _sistemaPensionService = sistemaPensionService;
+            _ingresosTrabajadoresService = ingresosTrabajadoresService;
         }
 
         public async Task CargarParametros()
@@ -186,6 +189,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
 
                     if (insertResult.Status == 200)
                     {
+                        var result = await RegistroMensual(objTrabajador.IdTrabajador);
                         TempData["SuccessMessage"] = "El trabajador creada exitosamente.";
                         return RedirectToAction(nameof(Index));
                     }
@@ -207,6 +211,7 @@ namespace Proyecto_Planilla_DSWI.Controllers
 
                     if (updateResult.Status == 200)
                     {
+                        var result = await RegistroMensual(objTrabajador.IdTrabajador);
                         TempData["SuccessMessage"] = "El trabajador actualizada exitosamente.";
                         return RedirectToAction(nameof(Index));
                     }
@@ -233,32 +238,61 @@ namespace Proyecto_Planilla_DSWI.Controllers
             return RedirectToAction("index");
         }
 
-        //public IActionResult IngresoMensual(int id)
-        //{
-        //    var obj = _ingresoLog.BusquedaOne(id);
 
-        //    if(obj == null)
-        //        return PartialView();
-        //    else
-        //        return PartialView(obj);
-        //}
+        public async Task<IActionResult> RegistroMensual(int IdTrabajador)
+        {
+            IngresosTrabajadores objIngreso = new IngresosTrabajadores();
 
-        //public IActionResult RegistroMensual(IngresosTrabajadores objIngreso)
-        //{
-        //    int intResult = 0;
-        //    if (objIngreso.IdIngresoTrabajador == 0)
-        //        intResult = _ingresoLog.Insert(objIngreso);
+            objIngreso.IdTrabajador = IdTrabajador;
+            objIngreso.Vale = 120;
+            objIngreso.Remuneracion = 1500;
+            objIngreso.BonifCargo = 120;
 
-        //    else
-        //        intResult = _ingresoLog.Update(objIngreso);
+            var result = await _ingresosTrabajadoresService.GetByIdAsync(IdTrabajador);
 
-        //    if (intResult == 0)
-        //        throw new Exception("No se realizó el registro.");
-        //    else
-        //        objIngreso.IdIngresoTrabajador = intResult;
+            if (result.Data == null || result.Data.IdIngresoTrabajador == 0)
+            {
+                var insertResult = await _ingresosTrabajadoresService.InsertAsync(objIngreso);
 
-        //    return PartialView(objIngreso);
-        //}
+                if (insertResult.Status == 200)
+                {
+                    TempData["SuccessMessage"] = "El trabajador creada exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    if (insertResult.Status == 412)
+                    {
+                        ModelState.AddModelError("", insertResult.Message);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = insertResult.Message;
+                    }
+                }
+            }
+            else {
+                var updateResult = await _ingresosTrabajadoresService.UpdateAsync(objIngreso.IdIngresoTrabajador, objIngreso);
 
+                if (updateResult.Status == 200)
+                {
+                    TempData["SuccessMessage"] = "El trabajador actualizada exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    if (updateResult.Status == 412)
+                    {
+                        ModelState.AddModelError("", updateResult.Message);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = updateResult.Message;
+                    }
+                }
+            }
+
+            return Ok();            
+        }
     }
 }
