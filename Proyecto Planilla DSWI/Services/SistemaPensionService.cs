@@ -127,8 +127,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<SistemaPensiones>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/SistemaPensionApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/SistemaPensionApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<SistemaPensiones>(result ?? new List<SistemaPensiones>());

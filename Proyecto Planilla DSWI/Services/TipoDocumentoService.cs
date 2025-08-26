@@ -100,8 +100,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<TipoDocumentos>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/TipoDocumentoApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/TipoDocumentoApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<TipoDocumentos>(result ?? new List<TipoDocumentos>());

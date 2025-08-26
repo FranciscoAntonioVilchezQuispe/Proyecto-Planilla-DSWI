@@ -128,10 +128,10 @@ namespace Proyecto_Planilla_API.Data
             else
             {
                 cadena = @"SELECT * FROM Trabajadores 
-                  WHERE (ApellidoPaterno LIKE CONCAT('%', @Busqueda, '%')
-                     OR ApellidoMaterno LIKE CONCAT('%', @Busqueda, '%')
-                     OR Nombres LIKE CONCAT('%', @Busqueda, '%')
-                     OR Documento LIKE CONCAT('%', @Busqueda, '%')
+                  WHERE (ApellidoPaterno LIKE CONCAT('%', @Busqueda, '%') 
+                     OR ApellidoMaterno LIKE CONCAT('%', @Busqueda, '%') 
+                     OR Nombres LIKE CONCAT('%', @Busqueda, '%') 
+                     OR Documento LIKE CONCAT('%', @Busqueda, '%')) 
                      AND (@Estado = -1 OR Activo = @Estado)";
 
                 parameters.Add(new MySqlParameter("@Busqueda", obj.Busqueda));
@@ -141,6 +141,20 @@ namespace Proyecto_Planilla_API.Data
 
             var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters.ToArray());
             return ADOConnection.MapDataTableToList<Trabajadores>(dataTable);
+        }
+
+        public Trabajadores BusquedaId(int Id)
+        {
+            string cadena;
+            List<MySqlParameter> parameters = new List<MySqlParameter>();
+
+            cadena = @"SELECT * FROM Trabajadores WHERE IdTrabajador = @IdTrabajador";
+            parameters.Add(new MySqlParameter("@IdTrabajador", Id));
+            
+
+            var dataTable = ADOConnection.ExecuteDataTable(cadena, parameters.ToArray());
+            return dataTable.Rows.Count > 0
+                ? ADOConnection.MapDataRowToObject<Trabajadores>(dataTable.Rows[0]) : new Trabajadores();
         }
     }
 } 

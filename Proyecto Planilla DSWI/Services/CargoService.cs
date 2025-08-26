@@ -104,8 +104,8 @@ namespace Proyecto_Planilla_DSWI.Services
                 var result = await ToResponse.HTTPExecuteAsync<string, List<Cargos>>(
                     Metodo.GET,
                     _apiBaseUrl,
-                    $"/api/CargosApi/Busqueda?estado={estado}",
-                    null
+                    $"/api/CargosApi",
+                    $"Busqueda?estado={estado}"
                 );
 
                 return new ToReturnList<Cargos>(result ?? new List<Cargos>());
