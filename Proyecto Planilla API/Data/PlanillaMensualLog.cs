@@ -79,6 +79,7 @@ namespace Proyecto_Planilla_API.Data
                 obj.TotalDescuento = Math.Round((decimal)obj.Aporte + (decimal)obj.Comision + (decimal)obj.Prima, 2, MidpointRounding.AwayFromZero);
                 obj.TotalNetoBoleta = Math.Round((decimal)obj.TotalIngreso - (decimal)obj.TotalDescuento, 2, MidpointRounding.AwayFromZero);
                 obj.TotalNetoBoletaCad = Proyecto_Planilla_Utils.NumberToLetters.ToCardinal((decimal)obj.TotalNetoBoleta) + " SOLES";
+                obj.TotalNetoCad = obj.TotalNetoBoletaCad;
                 arr.Add(obj);
             }
             return arr;
@@ -311,7 +312,152 @@ namespace Proyecto_Planilla_API.Data
             }
         }
 
-        
+
+        public string GenerarBoletaHtml(int idTrabajador, int año, int mes)
+        {
+            // Buscar datos en DB
+            string query = @"
+            SELECT * FROM PlanillaMensual
+            WHERE Año = @Año AND Mes = @Mes AND IdTrabajador = @IdTrabajador";
+
+            var parameters = new MySqlParameter[]
+            {
+            new MySqlParameter("@Año", año),
+            new MySqlParameter("@Mes", mes),
+            new MySqlParameter("@IdTrabajador", idTrabajador)
+            };
+
+            var dataTable = ADOConnection.ExecuteDataTable(query, parameters);
+            if (dataTable.Rows.Count == 0)
+                return string.Empty;
+
+            var obj = ADOConnection.MapDataRowToObject<PlanillaMensual>(dataTable.Rows[0]);
+
+            // Cargar info de trabajador, cargo, pensión
+            var objTrabajador = new TrabajadorLog().Busqueda(new BuquedaTrabajador())
+                                                   .FirstOrDefault(r => r.IdTrabajador == obj.IdTrabajador);
+            var objCargo = new CargoLog().Busqueda().FirstOrDefault(r => r.IdCargo == obj.IdCargo);
+            var objSistemaPensiones = new SistemaPensionLog().Busqueda().FirstOrDefault(r => r.IdSistemaPension == obj.IdSistemaPension);
+            var objtrabajadores = new TrabajadorLog().Busqueda(new BuquedaTrabajador()).FirstOrDefault(r => r.IdTrabajador == obj.IdTrabajador);
+
+            // Generar HTML (simplificado)
+            /*string html = $@"
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Boleta {año}/{mes}</title>
+        </head>
+        <body>
+            <h2>Boleta de Pago</h2>
+            <p><strong>Trabajador:</strong> {objTrabajador?.Nombres} {objTrabajador?.ApellidoPaterno} {objTrabajador?.ApellidoMaterno}</p>
+            <p><strong>Cargo:</strong> {objCargo?.Nombre}</p>
+            <p><strong>Sistema Pensión:</strong> {objSistemaPensiones?.Nombre}</p>
+            <p><strong>Total Ingreso:</strong> S/ {obj.TotalIngreso}</p>
+            <p><strong>Total Descuento:</strong> S/ {obj.TotalDescuento}</p>
+            <p><strong>Neto a Pagar:</strong> S/ {obj.TotalNetoBoleta}</p>
+        </body>
+        </html>";*/
+            string html = $@"
+            <!DOCTYPE html>
+            <html lang='es'>
+            <head>
+                <meta charset='UTF-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Boleta de Pago</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; }}
+                    .boleta {{ width: 800px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; }}
+                    header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }}
+                    header h1 {{ font-size: 24px; color: #0046ad; }}
+                    header h1 span {{ color: orange; }}
+                    .empresa-logo img {{ width: 150px; height: auto; }}
+                    .trabajador-info, .detalles, .resumen {{ margin-top: 20px; }}
+                    .detalles {{ display: flex; justify-content: space-between; }}
+                    .detalles div {{ width: 30%; }}
+                    .detalles table {{ width: 100%; border-collapse: collapse; }}
+                    .detalles table td {{ padding: 5px; border-bottom: 1px solid #ccc; }}
+                    footer {{ text-align: center; margin-top: 30px; }}
+                </style>
+            </head>
+            <body>
+                <div class='boleta'>
+                    <header>
+                        <div class='empresa-info'>
+                            <h1>BOLETA DE PAGO <span>{obj.Mes}/{obj.Año}</span></h1>
+                            <p><strong>Razón Social:</strong> Nombre Empresa Contratada</p>
+                            <p><strong>Dirección:</strong> Direccion Empresa Contratada</p>
+                            <p><strong>NIT:</strong> 25263987456 &nbsp; <strong>Reg. Patronal:</strong> 070710-00156</p>
+                        </div>
+                        <div class='empresa-logo'>
+                            <img src='logo.png' alt='Logo de la Empresa'>
+                            <p>D.S. N° 001-98-TR del 22/01/1998</p>
+                        </div>
+                    </header>
+
+                    <section class='trabajador-info'>
+                        <h2>Trabajador</h2>
+                        <p><strong>Trabajador:</strong> {objtrabajadores.Documento} {objtrabajadores.Nombres} {objtrabajadores.ApellidoPaterno} {objtrabajadores.ApellidoMaterno}</p>
+                        <p><strong>Fecha Ingreso:</strong> {objtrabajadores.FecIngreso.ToString("dd/MM/yyyy")}</p>
+                        <p><strong>Cargo:</strong>{objCargo.Nombre}</p>
+                        <p><strong>AFP/ONP:</strong> {objSistemaPensiones.Nombre} &nbsp; <strong>Código SPP:</strong> 652940CABEÑ3</p>
+                        <p><strong>Días Trab.:</strong> {obj.nDiasTrab} &nbsp; <strong>Horas:</strong> {obj.nHorasNormal}</p>
+                    </section>
+
+                    <section class='detalles'>
+                        <div class='ingresos'>
+                            <h3>Ingresos</h3>
+                            <table>
+                                <tr><td>Rem. Básico</td><td>S/ {obj.HaberBasico}</td></tr>
+                                <tr><td>Asig. Familiar</td><td>S/ {obj.vAsigFamiliar}</td></tr>
+                                <tr><td>Horas Extras 25%</td><td>S/ {obj.vHorasExtra1}</td></tr>
+                                <tr><td>Horas Extras 35%</td><td>S/ {obj.vHorasExtra2}</td></tr>
+                                <tr><td>Dias Feriados</td><td>S/ {obj.vFeriadoTrab}</td></tr>
+                                <tr><td>Vales</td><td>S/ {obj.ValesEmpleado}</td></tr>
+                                <tr><td>Bonificación Cargo</td><td>S/ {obj.BonificacionCargo}</td></tr>
+                                <tr><td>Total Ingresos</td><td><strong>S/ {obj.TotalIngreso}</strong></td></tr>
+                            </table>
+                        </div>
+                        
+                        <div class='descuentos'>
+                            <h3>Descuentos de Ley</h3>
+                            <table>
+                                <tr><td>Aporte</td><td>S/ {obj.Aporte}</td></tr>
+                                <tr><td>Comision</td><td>S/ {obj.Comision}</td></tr>
+                                <tr><td>Prima</td><td>S/ {obj.Prima}</td></tr>
+                                <tr><td>Total Descuentos</td><td><strong>S/ {obj.TotalDescuento}</strong></td></tr>
+                            </table>
+                        </div>
+
+                        <div class='aportes'>
+                            <h3>Aportes del Empleador</h3>
+                            <table>
+                                <tr><td>ESSALUD</td><td>S/ {obj.EsSalud}</td></tr>
+                                <tr><td>Seguro Vida Ley</td><td>S/ {obj.SeguroVidaLey}</td></tr>
+                                <tr><td>Total Empleador</td><td><strong>S/ {obj.EsSalud + obj.SeguroVidaLey}</strong></td></tr>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class='resumen'>
+                        <div class='neto'>
+                            <h3>Resumen</h3>
+                            <p><strong>Neto a Pagar:</strong> S/ {obj.TotalNetoBoleta}</p>
+                            <p><strong>Son:</strong> {obj.TotalNetoBoletaCad}</p>
+                        </div>
+                    </section>
+
+                    <footer>
+                        <p><strong>Emp. Nombre de Sistema</strong></p>
+                        <p>Recibí Conforme: <span>____________</span> DNI: <span>____________</span></p>
+                    </footer>
+                </div>
+            </body>
+            </html>";
+            return html;
+        }
+
+
 
 
         public List<PlanillaMensual> Lista(int año, int mes)
