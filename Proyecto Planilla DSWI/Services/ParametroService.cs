@@ -19,7 +19,7 @@ namespace Proyecto_Planilla_DSWI.Services
             try
             {
                 var result = await ToResponse.HTTPExecuteAsync<Parametros, int>(
-                    Metodo.POST,
+                    Metodo.GET,
                     _apiBaseUrl,
                     "/api/ParametrosApi/Insert",
                     parametro

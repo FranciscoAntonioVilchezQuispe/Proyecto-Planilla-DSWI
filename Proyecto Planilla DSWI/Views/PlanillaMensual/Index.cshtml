@@ -20,9 +20,9 @@
         <div class="d-flex justify-content-between align-items-center">
             <h3 class="card-title">@ViewData["Title"]</h3>
             <div>
-                <a id="btnExportar" href="@Url.Action("DescargarExcel", new { año = ViewBag.AñoSeleccionado, mes = ViewBag.MesSeleccionado })" class="btn btn-secondary btn-sm">
+                <!--<a id="btnExportar" href="@Url.Action("DescargarExcel", new { año = ViewBag.AñoSeleccionado, mes = ViewBag.MesSeleccionado })" class="btn btn-secondary btn-sm">
                     <i class="bi bi-file-excel"></i> Exportar
-                </a>
+                </a>-->
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-8">
-                <form asp-action="BuscarPlanilla" method="post" class="row g-3">
+                <form asp-action="BuscarPlanilla" method="get" class="row g-3" id="mainForm">
                     <div class="col-md-3">
                         <label class="form-label">Año</label>
                         <select name="año" class="form-select" asp-items="@(new SelectList(GlobalVariables.AñoPeriodo(), "Id", "Nombre", ViewBag.AñoSeleccionado))"></select>
@@ -40,19 +40,13 @@
                         <select name="mes" class="form-select" asp-items="@(new SelectList(GlobalVariables.Mes(), "Id", "Nombre", ViewBag.MesSeleccionado))"></select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary me-2">
+                        <button type="submit" class="btn btn-primary me-2" name="operacion" value="buscar">
                             <i class="bi bi-search"></i> Buscar
                         </button>
-                        <button type="submit" form="frmCalcular" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" name="operacion" value="calcular">
                             <i class="bi bi-calculator"></i> Calcular
                         </button>
                     </div>
-                </form>
-
-                <!-- Formulario cálculo -->
-                <form id="frmCalcular" asp-action="CalcularPlanilla" method="post" style="display: none;">
-                    <input type="hidden" name="año" value="@ViewBag.AñoSeleccionado" />
-                    <input type="hidden" name="mes" value="@ViewBag.MesSeleccionado" />
                 </form>
             </div>
         </div>
@@ -85,8 +79,13 @@
                                 <td>S/ @item.TotalDescuento?.ToString("N2")</td>
                                 <td>S/ @item.TotalNetoBoleta?.ToString("N2")</td>
                                 <td>
-                                    <a href="@Url.Action("GenerarBoleta", new { idTrabajador = item.IdTrabajador, año = ViewBag.AñoSeleccionado, mes = ViewBag.MesSeleccionado })"
-                                       class="btn btn-sm btn-info" target="_blank">
+                                    <a asp-controller="PlanillaMensual"
+                                       asp-action="GenerarBoleta"
+                                       asp-route-idTrabajador="@item.IdTrabajador"
+                                       asp-route-año="@item.Año"
+                                       asp-route-mes="@item.Mes"
+                                       target="_blank"
+                                       class="btn btn-sm btn-info">
                                         <i class="bi bi-eye"></i> Boleta
                                     </a>
                                 </td>
@@ -149,6 +148,7 @@
                     <input type="hidden" name="datos[@i].TotalDescuento" value="@item.TotalDescuento" />
                     <input type="hidden" name="datos[@i].TotalNetoBoleta" value="@item.TotalNetoBoleta" />
                     <input type="hidden" name="datos[@i].TotalNetoBoletaCad" value="@item.TotalNetoBoletaCad" />
+                    <input type="hidden" name="datos[@i].TotalNetoCad" value="@item.TotalNetoBoletaCad" />
                 }
                 <div class="text-end">
                     <button type="submit" class="btn btn-primary">
