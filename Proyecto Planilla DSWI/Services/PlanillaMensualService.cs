@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySqlX.XDevAPI.Common;
-using Proyecto_Planilla_DSWI.Data;
 using Proyecto_Planilla_DSWI.Interfaces;
 using Proyecto_Planilla_Entidades;
 using Proyecto_Planilla_Utils;
@@ -149,29 +148,6 @@ namespace Proyecto_Planilla_DSWI.Services
             }
         }
 
-        /*public async Task<string> GenerarBoletaAsync(int idTrabajador, int año, int mes)
-        {
-            try
-            {
-                // Para GET, el objeto se concatena en la URL, así que pasamos null como data
-                var result = await ToResponse.HTTPExecuteAsync<string, object>(
-                    GlobalEnum.Metodo.GET,
-                    _apiBaseUrl,
-                    "/GenerarBoleta",
-                    $"?idTrabajador={idTrabajador}&año={año}&mes={mes}"
-                    //null
-                );
-
-                /*"/GenerarBoleta",
-                    $"?idTrabajador={idTrabajador}&año={año}&mes={mes}"
-
-                return (string)(result ?? "<h3>Error: Respuesta vacía</h3>");
-            }
-            catch (Exception ex)
-            {
-                return $"<h3>Error al generar boleta: {ex.Message}</h3>";
-            }
-        }*/
         public async Task<string> GenerarBoletaAsync(int idTrabajador, int año, int mes)
         {
             try

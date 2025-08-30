@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Proyecto_Planilla_DSWI.Data;
 using Proyecto_Planilla_DSWI.Interfaces;
 using Proyecto_Planilla_Entidades;
 using static Proyecto_Planilla_Utils.GlobalEnum;

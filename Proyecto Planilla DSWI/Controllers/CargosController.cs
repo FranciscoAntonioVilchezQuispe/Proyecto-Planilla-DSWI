@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Proyecto_Planilla_DSWI.Data;
 using Proyecto_Planilla_DSWI.Interfaces;
 using Proyecto_Planilla_Entidades;
 using System.Drawing.Printing;
